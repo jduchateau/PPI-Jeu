@@ -8,9 +8,12 @@ Projet de jeu pour le cours INFO2056 de ULiège
 
 #### Déplacement
 Utilise les déplacement doux, câd que l'on ne déplace pas directement le personnage mais on agmente son accélération plus la souris est loin du personnage ce qui modifie sa vitesse donc sa position.
+L'idée est de faire comme si le personnage vollait. Ceci nous évite d'animer ses pied et d'autres choses...
 (voir le Labo MathPys)
 
-Ne peux jamais sortir de la zone de jeu. (facilite la création)
+Lorsque le personnage se déplace vers la droite on garde l'image mais lorsque il va vers la gauche il suffit de faire une transformation avec `pygame.transform.flip()`
+
+Ne peux jamais sortir de la zone de jeu. (facilite la création, mais on pourrais après décider d'amélioer cela)
 
 #### Apparition des ennemis
 La position de l'apparition se fait sur un bord, et ils convergent vers le joueur.

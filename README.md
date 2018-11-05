@@ -26,6 +26,14 @@ Le Decor_1 n'a aucun effect sur le joueur
 Le Decor_2 diminue la vie de joueur
 Le Decor_3 restaure la vie de joueur
 
+#### Perte de vie
+Le joueur principal ne doit endurer les attaque des ennemis ou du décor 2 de la même manière
+
+> Je ne sais pas encore comment on va gérér la vie ni les attaque
+> Je vois 2 choix simple :
+> - chaque entité aurait une force de frappe
+> - chaque entité a une résistance aux attaque
+
 ### Varables & Constantes
 - Entitées
     * type "joueur", "ennemis", "decor1", "decor2", "decor3"

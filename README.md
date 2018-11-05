@@ -37,6 +37,7 @@ Le Decor_3 restaure la vie de joueur
 
 - DEGRADATION_VIE
 - PUISSANCE_ATTAQUE
+- FORCE_FROTTEMENT
 
 - nb_morts
 

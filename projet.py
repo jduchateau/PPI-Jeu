@@ -1,22 +1,25 @@
+from pprint import pprint
+
 import pygame
 import math
 
 ##### VARIABLES & CONSTANTES #####
 
-FENETRE_HAUTEUR = 800
-FENETRE_LARGEUR = 1000
+WINDOWS_SIZE = (800, 1000)
 
-GREY       = (198, 186, 183)
-BLACK_PERS = ( 52,  51,  50)
+GREY = (198, 186, 183)
+BLACK_PERS = (52, 51, 50)
 
 MOUSE_LEFT = 1
 MOUSE_RIGHT = 2
 
-
-#### Vitesse
+# Vitesse
 SPEED_MAX = 10
 SPEED_MIN = 5
 DIST_MAX = 200
+
+FIGURE_SIZE = (90, 115)
+DECOR_SIZE = (300, 300)
 
 
 ##### FONCTIONS #####
@@ -30,7 +33,7 @@ def new_entity():
         'size': [0, 0],
         'color': None,
         'actualImg': None,
-        'life':100
+        'life': 100
     }
 
 
@@ -42,60 +45,101 @@ def invisible(entity):
     entity['visible'] = False
 
 
-def place(entity, x, y):
+def set_position(entity, x, y):
     entity['position'][0] = x
     entity['position'][1] = y
 
 
-def set_size(entity, w, h):
-    entity['size'][0] = w
-    entity['size'][1] = h
+def get_position(entity):
+    return tuple(entity['position'])
+
+
+def set_size(entity, w, h=None):
+    '''
+    Modifie la taille d'une entité.
+
+    Soit en donnant la largeur et hauteur séparément ou dans un Tulp.
+    :param entity:
+    :param w:
+    :param h:
+    '''
+    if h != None:
+        entity['size'][0] = w
+        entity['size'][1] = h
+    else:
+        entity['size'][0] = w[0]
+        entity['size'][1] = w[1]
+
+
+def get_size(entity):
+    return tuple(entity['size'])
+
+
+def set_image(entity, image):
+    entity['actualImg'] = image
+
+
+def get_image(entity):
+    return entity['actualImg']
 
 
 def set_color(entity, c):
     entity['color'] = c
 
 
-def dessine(ecran, entity, number):
-    # ecran.bilt(entity['actualImg'], entity['position'])
-    if (number == 0):
+def draw(entity, ecran):
+    '''
+    Dessine l'entité sur la fenetre selon les parametres de celle ci.
+
+    Si il y a une couleur un rectangle de  cette couleur
+    Si il y a une image l'image à la taille
+    :param entity:
+    :param ecran:
+    '''
+    if entity['color'] is tuple:
         pygame.draw.rect(ecran, entity['color'], (entity['position'], entity['size']))
-    elif (number == 1):
-        pygame.draw.circle(ecran, entity['color'], entity['position'], entity['size'][0] // 2)
+    else:
+        ecran.blit(get_image(entity), get_position(entity))
 
 
-def vitesse(entity, m, axe):
+def speed(entity, mouse, axe):
     '''
     On utilise la fonction sigmoide pour calculer la vitesse
 
     :param entity: object entité
-    :param m: TODO je ne comprend pas "m"
+    :param mouse:
     :param axe: 0 || 1
-    :return: vitesse
+    :return: speed
     '''
 
     dist_min = entity['size'][0] // 2
-    dist = abs((entity['position'][axe] + entity['size'][axe] // 2) - m)
+    dist = abs((entity['position'][axe] + entity['size'][axe] // 2) - mouse)
 
     if (dist >= dist_min and dist <= DIST_MAX):
-        # v = k*entity['position'][axe] + t
-        v = int(1 / (1 + math.exp(-(dist * 6 / DIST_MAX))) * SPEED_MAX)
+        speed = int(1 / (1 + math.exp(-(dist * 6 / DIST_MAX))) * SPEED_MAX)
     elif (dist > DIST_MAX):
-        v = SPEED_MAX
+        speed = SPEED_MAX
     else:
-        if ((entity['position'][axe] + entity['size'][axe] // 2) != m):
-            v = 1
+        if ((entity['position'][axe] + entity['size'][axe] // 2) != mouse):
+            speed = 1
         else:
-            v = 0
+            speed = 0
 
-    return v
+    return speed
 
 
 def move_pers(entity, vx, vy):
+    '''
+    Déplace l'entité selon la vitesse donnée
+    :param entity:
+    :param vx:
+    :param vy:
+    '''
     global mx, my
-    ## verifie vitese (  compare si la x > ou < xmouse et si y > ou < que ymouse) et modifier la vitesse
-    vx = vitesse(entity, vx, mx, 0)
-    vy = vitesse(entity, vy, my, 1)
+
+    # verifie vitese (compare si la x > ou < xmouse et si y > ou < que ymouse) et modifier la vitesse
+    vx = speed(entity, mx, 0)
+    vy = speed(entity, my, 1)
 
     if ((entity['position'][0] + entity['size'][0] // 2) > mx):
         if (vx > 0):
@@ -103,13 +147,14 @@ def move_pers(entity, vx, vy):
     elif ((entity['position'][0] + entity['size'][0] // 2) < mx):
         if (vx < 0):
             vx *= -1
+
     if ((entity['position'][1] + entity['size'][1] // 2) > my):
         if (vy > 0):
             vy *= -1
     elif ((entity['position'][1] + entity['size'][1] // 2) < my):
         if (vy < 0):
             vy *= -1
-    ## verifie vitese fin
+    # verifie vitese fin
 
     if ((entity['position'][0] + entity['size'][0] // 2) != mx):
         entity['position'][0] += vx
@@ -117,8 +162,8 @@ def move_pers(entity, vx, vy):
         entity['position'][1] += vy
 
 
-# print(" dx: ", diff_vx)
-#### FIN ENTITE
+##### FIN ENTITE ######
+
 def traite_entrees():
     global fini, mouse_clicked, mx, my
     for evenement in pygame.event.get():
@@ -129,43 +174,55 @@ def traite_entrees():
             mx, my = pygame.mouse.get_pos()
 
 
-def draw():
-    # choisir 0 : dissiner un rect
-    # choisir 1 : dessiner une sphere
-    dessine(fenetre, pers, 0)
+def draw_all():
+    global entities
+    for entity in entities:
+        draw(entity, fenetre)
 
 
+##### OBJECTS INIT #####
 pygame.init()
-############ INITIALISE ############
-#### PERS
-pers_size = (30, 30)
-pers_location = ((FENETRE_LARGEUR // 2 - pers_size[0] // 2), (FENETRE_HAUTEUR // 2 - pers_size[1] // 2))
-pers = new_entity()
-visible(pers)
-set_size(pers, pers_size[0], pers_size[1])
-set_color(pers, BLACK_PERS)
-place(pers, pers_location[0], pers_location[1])
 
-fenetre_taille = (FENETRE_LARGEUR, FENETRE_HAUTEUR)
-fenetre = pygame.display.set_mode(fenetre_taille)
-pygame.display.set_caption('Game')
+fenetre = pygame.display.set_mode(WINDOWS_SIZE)
+pygame.display.set_caption('Battail dans le vide')
 
-############ INITIALISE END ############
+# Liste de toutes les entitées
+entities = []
 
-############ VARIABLES ############
+# Images
+path = 'img/'
+imgE1Joueur = pygame.image.load(path + 'E1_Joueur.png').convert_alpha(fenetre)
+imgE1Joueur = pygame.transform.scale(imgE1Joueur, (FIGURE_SIZE[0], FIGURE_SIZE[1]))
+
+# Personage
+gamer = new_entity()
+
+set_size(gamer, FIGURE_SIZE)
+
+set_position(gamer, WINDOWS_SIZE[0] / 2 - get_size(gamer)[0] / 2, WINDOWS_SIZE[1] / 2 - get_size(gamer)[1] / 2)
+
+visible(gamer)
+
+set_image(gamer, imgE1Joueur)
+
+entities.append(gamer)
+
+##### OBJECTS INI END #####
+
+##### VARIABLES #####
 temps = pygame.time.Clock()
 mx = 0
 my = 0
 mouse_clicked = False
 fini = False
 
-############ THE MAIN WHILE ############
+##### THE MAIN WHILE #####
 while not fini:
     traite_entrees()
     fenetre.fill(GREY)
-    draw()
+    draw_all()
     if (mouse_clicked == True):
-        move_pers(pers, 3, 3)
+        move_pers(gamer, 3, 3)
     pygame.display.flip()
     temps.tick(50)
 

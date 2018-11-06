@@ -27,6 +27,11 @@ DECOR_SIZE = (300, 300)
 
 #### Début ENTITE #####
 def new_entity(type):
+    '''
+
+    :param type: "gamer", "enemy", "decor1", "decor2", "decor3"
+    :return:
+    '''
     return {
         'type': type,
         'visible': True,
@@ -209,19 +214,37 @@ entities = []
 # Images
 path = 'img/'
 imgE1Joueur = pygame.image.load(path + 'E1_Joueur.png').convert_alpha(fenetre)
-imgE1Joueur = pygame.transform.scale(imgE1Joueur, (FIGURE_SIZE[0], FIGURE_SIZE[1]))
+imgE1Joueur = pygame.transform.scale(imgE1Joueur, FIGURE_SIZE)
+
+imgE2Ennemis = pygame.image.load(path + 'E2_Ennemis.png').convert_alpha(fenetre)
+imgE2Ennemis = pygame.transform.scale(imgE2Ennemis, FIGURE_SIZE)
+
+imgDecor1 = pygame.image.load(path + 'Decor_1.png').convert_alpha(fenetre)
+imgDecor1 = pygame.transform.scale(imgDecor1, DECOR_SIZE)
+
+imgDecor2 = pygame.image.load(path + 'Decor_2.png').convert_alpha(fenetre)
+imgDecor2 = pygame.transform.scale(imgDecor2, DECOR_SIZE)
+
+imgDecor3 = pygame.image.load(path + 'Decor_3.png').convert_alpha(fenetre)
+imgDecor3 = pygame.transform.scale(imgDecor3, DECOR_SIZE)
 
 # Personage
 gamer = new_entity('gamer')
 
 set_size(gamer, FIGURE_SIZE)
-
 set_position(gamer, WINDOWS_SIZE[0] / 2 - get_size(gamer)[0] / 2, WINDOWS_SIZE[1] / 2 - get_size(gamer)[1] / 2)
-
+set_image(gamer, imgE1Joueur)
 visible(gamer)
 
-set_image(gamer, imgE1Joueur)
+# Decor (artificel)
+decor1 = new_entity('decor1')
 
+set_size(decor1, DECOR_SIZE)
+set_position(decor1, WINDOWS_SIZE[0] * 4 / 6, WINDOWS_SIZE[1] /2)
+set_image(decor1, imgDecor1)
+visible(decor1)
+
+entities.append(decor1)
 entities.append(gamer)
 
 ##### OBJECTS INI END #####

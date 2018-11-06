@@ -45,12 +45,26 @@ def invisible(entity):
     entity['visible'] = False
 
 
+def is_visible(entity):
+    return entity['visible']
+
+
 def set_position(entity, x, y):
     entity['position'][0] = x
     entity['position'][1] = y
 
 
-def get_position(entity):
+def get_position(entity, round=False):
+    '''
+    Retourne la position de l'entité arrondie si demandé dans int
+
+    :param entity:
+    :param round: Arrondis les valeur de la position
+    :return: Position
+    '''
+    if round:
+        return int(entity['position'][0]), int(entity['position'][1])
+
     return tuple(entity['position'])
 
 
@@ -96,10 +110,13 @@ def draw(entity, ecran):
     :param entity:
     :param ecran:
     '''
+    if not is_visible(entity):
+        return
+
     if entity['color'] is tuple:
         pygame.draw.rect(ecran, entity['color'], (entity['position'], entity['size']))
-    else:
-        ecran.blit(get_image(entity), get_position(entity))
+    elif get_image(entity):
+        ecran.blit(get_image(entity), get_position(entity, True))
 
 
 def speed(entity, mouse, axe):
@@ -141,24 +158,24 @@ def move_pers(entity, vx, vy):
     vx = speed(entity, mx, 0)
     vy = speed(entity, my, 1)
 
-    if ((entity['position'][0] + entity['size'][0] // 2) > mx):
+    if ((entity['position'][0] + entity['size'][0] / 2) > mx):
         if (vx > 0):
             vx *= -1
-    elif ((entity['position'][0] + entity['size'][0] // 2) < mx):
+    elif ((entity['position'][0] + entity['size'][0] / 2) < mx):
         if (vx < 0):
             vx *= -1
 
-    if ((entity['position'][1] + entity['size'][1] // 2) > my):
+    if ((entity['position'][1] + entity['size'][1] / 2) > my):
         if (vy > 0):
             vy *= -1
-    elif ((entity['position'][1] + entity['size'][1] // 2) < my):
+    elif ((entity['position'][1] + entity['size'][1] / 2) < my):
         if (vy < 0):
             vy *= -1
     # verifie vitese fin
 
-    if ((entity['position'][0] + entity['size'][0] // 2) != mx):
+    if ((entity['position'][0] + entity['size'][0] / 2) != mx):
         entity['position'][0] += vx
-    if ((entity['position'][1] + entity['size'][1] // 2) != my):
+    if ((entity['position'][1] + entity['size'][1] / 2) != my):
         entity['position'][1] += vy
 
 

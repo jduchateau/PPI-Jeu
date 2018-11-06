@@ -36,19 +36,22 @@ Le joueur principal ne doit endurer les attaque des ennemis ou du décor 2 de la
 > - chaque entité a une résistance aux attaque
 
 ### Varables & Constantes
-- Entitées
-    * type "joueur", "ennemis", "decor1", "decor2", "decor3"
+- entity
+    * type "gamer", "enemy", "decor1", "decor2", "decor3"
+    * visible Bool
     * position [x,y]
-    * vitesse [x,y]
+    * size [x,y]
+    * speed [x,y]
     * images [nom:image]
-    * imageActuel "nom"
-    * vie
+    * actualImg Surface
+    * life int
 
-- DEGRADATION_VIE
-- PUISSANCE_ATTAQUE
-- FORCE_FROTTEMENT
+- SPEED_MAX
+- SPEED_MIN
+- DIST_MAX
 
 - nb_morts
+- entities
 
 (à complèter au fur et à mesur)
 

@@ -5,7 +5,7 @@ import math
 
 ##### VARIABLES & CONSTANTES #####
 
-WINDOWS_SIZE = (800, 1000)
+WINDOWS_SIZE = (1000, 800)
 
 GREY = (198, 186, 183)
 BLACK_PERS = (52, 51, 50)
@@ -26,11 +26,13 @@ DECOR_SIZE = (300, 300)
 
 
 #### Début ENTITE #####
-def new_entity():
+def new_entity(type):
     return {
+        'type': type,
         'visible': True,
         'position': [0, 0],
         'size': [0, 0],
+        'speed': [0, 0],
         'color': None,
         'actualImg': None,
         'life': 100
@@ -145,12 +147,10 @@ def speed(entity, mouse, axe):
     return speed
 
 
-def move_pers(entity, vx, vy):
+def move_entity(entity):
     '''
-    Déplace l'entité selon la vitesse donnée
+    Déplace l'entité
     :param entity:
-    :param vx:
-    :param vy:
     '''
     global mx, my
 
@@ -212,7 +212,7 @@ imgE1Joueur = pygame.image.load(path + 'E1_Joueur.png').convert_alpha(fenetre)
 imgE1Joueur = pygame.transform.scale(imgE1Joueur, (FIGURE_SIZE[0], FIGURE_SIZE[1]))
 
 # Personage
-gamer = new_entity()
+gamer = new_entity('gamer')
 
 set_size(gamer, FIGURE_SIZE)
 
@@ -239,7 +239,7 @@ while not fini:
     fenetre.fill(GREY)
     draw_all()
     if (mouse_clicked == True):
-        move_pers(gamer, 3, 3)
+        move_entity(gamer)
     pygame.display.flip()
     temps.tick(50)
 

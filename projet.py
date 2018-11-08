@@ -146,6 +146,8 @@ def draw(entity, ecran):
         ecran.blit(get_image(entity), get_position(entity, True))
 
 
+### Début DÉPLACEMENT ####
+
 def speed(entity, point, axe):
     '''
     On utilise la fonction sigmoide pour calculer la vitesse
@@ -213,13 +215,15 @@ def move_ennemy(entity):
 
     # Calule la distance entre l'ennemis et le joueur
     gamer = gamers[0]
-    dist = tuple(x - y for x, y in zip(get_position(gamer), get_position(entity))) # différence entre deux tuples
+    dist = tuple(x - y for x, y in zip(get_position(gamer), get_position(entity)))  # différence entre deux tuples
     pprint(dist)
 
     # Determine la vitesse
 
     # Applique le déplacement
 
+
+#### Fin DÉPLACEMENT #####
 
 ##### FIN ENTITE ######
 

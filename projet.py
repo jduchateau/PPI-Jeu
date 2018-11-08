@@ -197,7 +197,10 @@ def traite_entrees():
 
 
 def draw_all():
-    global entities
+    global gamers, enemies, decors
+
+    # Fusionne les listes dans le bonne ordre
+    entities = decors + enemies + gamers
     for entity in entities:
         draw(entity, fenetre)
 
@@ -208,8 +211,10 @@ pygame.init()
 fenetre = pygame.display.set_mode(WINDOWS_SIZE)
 pygame.display.set_caption('Battail dans le vide')
 
-# Liste de toutes les entitées
-entities = []
+# Liste des entitées selon le type
+gamers = []
+enemies = []
+decors = []
 
 # Images
 path = 'img/'
@@ -235,17 +240,18 @@ set_size(gamer, FIGURE_SIZE)
 set_position(gamer, WINDOWS_SIZE[0] / 2 - get_size(gamer)[0] / 2, WINDOWS_SIZE[1] / 2 - get_size(gamer)[1] / 2)
 set_image(gamer, imgE1Joueur)
 visible(gamer)
+gamers.append(gamer)
 
 # Decor (artificel)
 decor1 = new_entity('decor1')
 
 set_size(decor1, DECOR_SIZE)
-set_position(decor1, WINDOWS_SIZE[0] * 4 / 6, WINDOWS_SIZE[1] /2)
+set_position(decor1, WINDOWS_SIZE[0] * 4 / 6, WINDOWS_SIZE[1] / 2)
 set_image(decor1, imgDecor1)
 visible(decor1)
 
-entities.append(decor1)
-entities.append(gamer)
+decors.append(decor1)
+
 
 ##### OBJECTS INI END #####
 

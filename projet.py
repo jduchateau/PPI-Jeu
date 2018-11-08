@@ -32,11 +32,18 @@ def new_entity(type):
     :param type: "gamer", "enemy", "decor1", "decor2", "decor3"
     :return:
     '''
+    size = [0, 0]
+
+    if type == "gamer" or type == "enemy":
+        size = FIGURE_SIZE
+    elif type == "decor1":
+        size = DECOR_SIZE
+
     return {
         'type': type,
-        'visible': True,
+        'visible': False,
         'position': [0, 0],
-        'size': [0, 0],
+        'size': size,
         'speed': [0, 0],
         'color': None,
         'actualImg': None,
@@ -56,9 +63,22 @@ def is_visible(entity):
     return entity['visible']
 
 
-def set_position(entity, x, y):
-    entity['position'][0] = x
-    entity['position'][1] = y
+def set_position(entity, x, y=None):
+    '''
+    Modifie la position de l'entité
+
+    Soit en donnant un couple de valeur ou séparée par une virgule
+
+    :param entity:
+    :param x:
+    :param y:
+    :return:
+    '''
+    if y != None:
+        entity['position'][0] = x
+        entity['position'][1] = y
+    else:
+        entity['position'] = x
 
 
 def get_position(entity, round=False):
@@ -236,22 +256,28 @@ imgDecor3 = pygame.transform.scale(imgDecor3, DECOR_SIZE)
 # Personage
 gamer = new_entity('gamer')
 
-set_size(gamer, FIGURE_SIZE)
 set_position(gamer, WINDOWS_SIZE[0] / 2 - get_size(gamer)[0] / 2, WINDOWS_SIZE[1] / 2 - get_size(gamer)[1] / 2)
 set_image(gamer, imgE1Joueur)
 visible(gamer)
 gamers.append(gamer)
 
+# Ennemi (artificiel)
+enemy1 = new_entity('ennemy')
+
+set_position(enemy1, 50, 50)
+set_image(enemy1, imgE2Ennemis)
+visible(enemy1)
+
+enemies.append(enemy1)
+
 # Decor (artificel)
 decor1 = new_entity('decor1')
 
-set_size(decor1, DECOR_SIZE)
 set_position(decor1, WINDOWS_SIZE[0] * 4 / 6, WINDOWS_SIZE[1] / 2)
 set_image(decor1, imgDecor1)
 visible(decor1)
 
 decors.append(decor1)
-
 
 ##### OBJECTS INI END #####
 

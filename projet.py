@@ -146,25 +146,25 @@ def draw(entity, ecran):
         ecran.blit(get_image(entity), get_position(entity, True))
 
 
-def speed(entity, mouse, axe):
+def speed(entity, point, axe):
     '''
     On utilise la fonction sigmoide pour calculer la vitesse
 
     :param entity: object entité
-    :param mouse:
+    :param point:
     :param axe: 0 || 1
     :return: speed
     '''
 
     dist_min = entity['size'][0] // 2
-    dist = abs((entity['position'][axe] + entity['size'][axe] // 2) - mouse)
+    dist = abs((entity['position'][axe] + entity['size'][axe] // 2) - point)
 
     if (dist >= dist_min and dist <= DIST_MAX):
         speed = int(1 / (1 + math.exp(-(dist * 6 / DIST_MAX))) * SPEED_MAX)
     elif (dist > DIST_MAX):
         speed = SPEED_MAX
     else:
-        if ((entity['position'][axe] + entity['size'][axe] // 2) != mouse):
+        if ((entity['position'][axe] + entity['size'][axe] // 2) != point):
             speed = 1
         else:
             speed = 0
@@ -172,9 +172,9 @@ def speed(entity, mouse, axe):
     return speed
 
 
-def move_entity(entity):
+def move_gamer(entity):
     '''
-    Déplace l'entité
+    Déplace un joueur
     :param entity:
     '''
     global mx, my
@@ -202,6 +202,23 @@ def move_entity(entity):
         entity['position'][0] += vx
     if ((entity['position'][1] + entity['size'][1] / 2) != my):
         entity['position'][1] += vy
+
+
+def move_ennemy(entity):
+    '''
+    Déplace l'ennemi
+
+    :param entity:
+    '''
+
+    # Calule la distance entre l'ennemis et le joueur
+    gamer = gamers[0]
+    dist = tuple(x - y for x, y in zip(get_position(gamer), get_position(entity))) # différence entre deux tuples
+    pprint(dist)
+
+    # Determine la vitesse
+
+    # Applique le déplacement
 
 
 ##### FIN ENTITE ######
@@ -294,7 +311,8 @@ while not fini:
     fenetre.fill(GREY)
     draw_all()
     if (mouse_clicked == True):
-        move_entity(gamer)
+        move_gamer(gamer)
+        move_ennemy(enemy1)
     pygame.display.flip()
     temps.tick(50)
 

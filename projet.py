@@ -227,6 +227,29 @@ def move_ennemy(entity):
 
 ##### FIN ENTITE ######
 
+##### Début GÉNÉRATEUR ######
+
+def new_generator():
+    '''
+
+    :return:
+    '''
+    return {
+        ""
+    }
+
+
+def generate(generator, level):
+    '''
+
+    :param generator:
+    :param level:
+    :return:
+    '''
+
+
+##### Fin GÉNÉRATEUR ######
+
 def traite_entrees():
     global fini, mouse_clicked, mx, my
     for evenement in pygame.event.get():
@@ -244,6 +267,17 @@ def draw_all():
     entities = decors + enemies + gamers
     for entity in entities:
         draw(entity, fenetre)
+
+
+def level():
+    '''
+    Calcule le niveau du joueur
+
+    :return: level [0-infinity[
+    '''
+    global nb_morts
+
+    return nb_morts // 5
 
 
 ##### OBJECTS INIT #####
@@ -308,6 +342,8 @@ mx = 0
 my = 0
 mouse_clicked = False
 fini = False
+
+nb_morts = 0
 
 ##### THE MAIN WHILE #####
 while not fini:

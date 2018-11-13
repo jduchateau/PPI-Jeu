@@ -6,7 +6,7 @@ import random
 
 ##### VARIABLES & CONSTANTES #####
 
-WINDOWS_SIZE = (1000, 800)
+WINDOWS_SIZE = (1000, 700)
 
 GREY = (198, 186, 183)
 BLACK_PERS = (52, 51, 50)
@@ -21,6 +21,7 @@ DIST_MAX = 200
 
 FIGURE_SIZE = (90, 115)
 SHIELD_SIZE = (100, 120)
+GUN_SIZE = (100, 120)
 DECOR_SIZE = (300, 300)
 
 
@@ -35,13 +36,12 @@ def new_entity(type):
     :return:
     '''
     size = [0, 0]
-
+    size_shield = SHIELD_SIZE
+    size_gun = GUN_SIZE
     if type == "gamer" or type == "enemy":
         size = FIGURE_SIZE
     elif type == "decor1":
         size = DECOR_SIZE
-    elif type == "shield":
-        size = SHIELD_SIZE
 
     return {
         'type': type,
@@ -52,7 +52,18 @@ def new_entity(type):
         'color': None,
         'actualImg': None,
         'life': 100,
-        'R': 300 # Radius of vison 
+        'R': 300, # Radius of vison
+        'shield':{
+            'exist':False,
+            'size' : size_shield,
+            'position': None
+        },  
+       'gun':{
+            'exist':False,
+            'size' : size_gun,
+            'position': None
+        } 
+        
     }
 
 
@@ -317,6 +328,9 @@ def traite_entrees():
         elif evenement.type == pygame.MOUSEBUTTONDOWN and evenement.button == MOUSE_LEFT:
             mouse_clicked = True
             mx, my = pygame.mouse.get_pos()
+        elif evenement.type == pygame.KEYDOWN:
+            if evenement.key == pygame.K_SPACE:
+                print('in')
 
 
 def draw_all():
@@ -377,11 +391,6 @@ set_position(gamer, WINDOWS_SIZE[0] / 2 - get_size(gamer)[0] / 2, WINDOWS_SIZE[1
 set_image(gamer, imgE1Joueur)
 visible(gamer)
 gamers.append(gamer)
-
-# Shield
-# shield = new_entity('shield')
-# set_position(shield, gamer['position'][0], gamer['position'][1] )
-# set_image(shield, imgShield)
 
 # Ennemi (artificiel)
 enemy1 = new_entity('ennemy')

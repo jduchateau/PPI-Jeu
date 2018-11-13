@@ -12,7 +12,7 @@ GREY = (198, 186, 183)
 BLACK_PERS = (52, 51, 50)
 
 MOUSE_LEFT = 1
-MOUSE_RIGHT = 2
+MOUSE_RIGHT = 3
 
 # Vitesse
 SPEED_MAX = 10
@@ -24,7 +24,7 @@ SHIELD_SIZE = (100, 120)
 GUN_SIZE = (83, 114)
 DECOR_SIZE = (300, 300)
 
-MARGIN = 10
+MARGIN = 100
 
 
 ##### FONCTIONS #####
@@ -40,6 +40,7 @@ def new_entity(type):
     '''
     size = [0, 0]
     life = 0
+    power = 10
     size_shield = SHIELD_SIZE
     size_gun = GUN_SIZE
 
@@ -47,9 +48,11 @@ def new_entity(type):
     if type == "gamer":
         size = FIGURE_SIZE
         life = 100
+        power = 10
     elif type == "enemy":
         size = FIGURE_SIZE
         life = 10
+        power = 5
     elif type == "decor1":
         size = DECOR_SIZE
 
@@ -62,12 +65,14 @@ def new_entity(type):
     return {
         'type': type,
         'visible': False,
+        'active': True,  # Si faux ne peut rien faire ni attquer ni se défendre
         'position': [0, 0],
         'size': size,
         'speed': [0, 0],
         'color': None,
         'actualImg': None,
         'life': life,
+        'power': power,
         'R': 300,  # Radius of vison
         'shield': {
             'exist': False,
@@ -78,7 +83,8 @@ def new_entity(type):
             'exist': False,
             'size': size_gun,
             'position': None,
-            'end': 0
+            'end': 0,
+            'direction': 0
         },
         'enemy': extra,
 
@@ -95,6 +101,25 @@ def invisible(entity):
 
 def is_visible(entity):
     return entity['visible']
+
+
+def active(entity):
+    entity['active'] = True
+
+
+def inactive(entity, expiration):
+    entity['active'] = False
+    entity['expiration'] = expiration
+
+
+def is_active(entity):
+    return entity['active']
+
+
+def get_expiration(entity):
+    if not is_active(entity):
+        return entity['expiration']
+    return None
 
 
 def set_position(entity, x, y=None):
@@ -162,6 +187,46 @@ def set_color(entity, c):
     entity['color'] = c
 
 
+def get_power(entity):
+    return entity['power']
+
+
+def set_power(entity, power, relatif):
+    '''
+    Définit la force de l'attque
+
+    Si relatif ajoute power au pouvoir actuel
+    :param entity:
+    :param power: int
+    :param relatif: bool
+    :return:
+    '''
+    if relatif:
+        entity['power'] += power
+    else:
+        entity['power'] = power
+
+
+def get_life(entity):
+    return entity['life']
+
+
+def set_life(entity, life, relatif):
+    '''
+    Définit la force de l'attque
+
+    Si relatif enleve life à la vie actuel
+    :param entity:
+    :param life: int
+    :param relatif: bool
+    :return:
+    '''
+    if relatif:
+        entity['life'] -= life
+    else:
+        entity['life'] = life
+
+
 def draw(entity, ecran):
     '''
     Dessine l'entité sur la fenetre selon les parametres de celle ci.
@@ -178,10 +243,15 @@ def draw(entity, ecran):
         pygame.draw.rect(ecran, entity['color'], (entity['position'], entity['size']))
     elif get_image(entity):
         ecran.blit(get_image(entity), get_position(entity, True))
+
     if entity['shield']['exist'] == True and entity['type'] == "gamer":
         entity['shield']['position'][0] = entity['position'][0] - 5
         entity['shield']['position'][1] = entity['position'][1]
         ecran.blit(imgShield, (entity['shield']['position']))
+
+    if entity['gun']['exist']:
+        imgGunRotated = pygame.transform.rotate(imgGun, entity['gun']['direction'])
+        ecran.blit(imgGunRotated, entity['gun']['position'])
 
 
 ### Début DÉPLACEMENT ####
@@ -244,7 +314,7 @@ def move_gamer(entity):
         entity['position'][1] += vy
 
 
-def move_ennemy(entity):
+def move_ennemy(entity, actualTime):
     global inVision, deplace_dist, randx, randy
     '''
     Déplace l'ennemi en verifiant si le personnage est dans son champ de vision ou pas
@@ -254,6 +324,16 @@ def move_ennemy(entity):
 
     :param entity:
     '''
+
+    # Si pas actif on s'arrête ici
+    if not is_active(entity):
+        # Et si l'entité a expire la supprime
+        if get_expiration(entity) <= actualTime:
+            invisible(entity)
+            del entity
+
+        return False
+
     inVision = entity['enemy']['inVision']
     deplace_dist = entity['enemy']['deplace_dist']
     randx = entity['enemy']['randx']
@@ -369,7 +449,6 @@ def generate(generator, level, time):
                 position = (random.randint(0, WINDOWS_SIZE[0]), 0)
         elif generator['zone'] == 'all':
             position = (random.randint(0, WINDOWS_SIZE[0]), random.randint(0, WINDOWS_SIZE[1]))
-            pprint(position)
 
         entity = new_entity(generator['type'])
         set_position(entity, position)
@@ -387,19 +466,46 @@ def generate(generator, level, time):
 
 ##### Fin GÉNÉRATEUR ######
 
+##### Début Attaque #####
 def attaque(entity, target, time):
     global nb_morts
 
+    delait = 800
+    if not is_visible(target) or not is_active(target):
+        return False
+
     # Distence entre les deux
-    dist = math.sqrt(
-        (target['position'][0] - entity['position'][0]) ** 2
-        + (target['position'][1] - entity['position'][1]) ** 2
-    )
+    delta_x = target['position'][0] - entity['position'][0]
+    delta_y = target['position'][1] - entity['position'][1]
+    dist = math.sqrt(delta_x ** 2 + delta_y ** 2)
+
+    print('Attaque ? ' + str(dist))
 
     if dist < MARGIN:
+        print('!!! Attaque !!! ')
+
         entity['gun']['exist'] = True
-        entity['gun']['end'] = time + 500
-        target['life']
+        entity['gun']['end'] = time + delait
+
+        # Calcule la direction et la position de l'image
+        direction = math.degrees(math.asin(-delta_y / dist))
+        print(direction)
+
+        # Regle le problème de reduction de domaine (et de signe) dans l'arcsin
+        if delta_x < 0:
+            direction += 180
+
+        entity['gun']['direction'] = direction
+        entity['gun']['position'] = get_position(target)
+
+        set_life(target, get_power(entity), True)
+
+        # Mort
+        if get_life(target) <= 0:
+            nb_morts += 1
+            pprint({'Nombre de morts': nb_morts})
+
+            inactive(target, time + delait)
 
 
 def auto_attaque():
@@ -417,39 +523,60 @@ def attaque_enemy(gamer, mouseposition, time):
     :return:
     '''
 
-    targetPoint = mouseposition[0], mouseposition[1]
+    targetPoint = mouseposition
+    pprint(targetPoint)
 
+    print('Recherche...')
     # Trouver l'ennemi dans cette direction
-    for enemy in enemies:
-        if abs(targetPoint[0] - enemy['position'][0]) < MARGIN and abs(targetPoint[1] - enemy['position'][1]) < MARGIN:
-            target = enemy
-
-            attaque(gamer, target, time)
-
-
-##### Début Attaque #####
+    for i in range(len(enemies)):
+        if abs(targetPoint[0] - get_position(enemies[i])[0]) < MARGIN \
+                and abs(targetPoint[1] - get_position(enemies[i])[1]) < MARGIN \
+                and is_visible(enemies[i]):
+            print('... Trouvé')
+            attaque(gamer, enemies[i], time)
 
 
 ##### Fin Attaque #####
 
+##### Collisions #####
+def collision(entity, target):
+    if ((entity['position'][0] + entity['size'][0]) >= target['position'][0] and entity['position'][0] <= (
+            target['position'][0] + target['size'][0])):
+        if ((entity['position'][1] + entity['size'][1]) >= target['position'][1] and entity['position'][1] <= (
+                target['position'][1] + target['size'][1])):
+            return 1
+    else:
+        return 0
 
-def traite_entrees():
+
+def collisions_deco(entity, second):
+    if (entity['type'] == "gamer"):
+        if (collision(entity, second)):
+            print('in babe')
+
+
+##### Fin collisions #####
+
+def traite_entrees(time):
     global fini, mouse_clicked, mx, my
     for evenement in pygame.event.get():
+
         if evenement.type == pygame.QUIT:
             fini = True
+
         elif evenement.type == pygame.MOUSEBUTTONDOWN:
             if evenement.button == MOUSE_LEFT:
                 mouse_clicked = True
                 mx, my = pygame.mouse.get_pos()
             elif evenement.button == MOUSE_RIGHT:
-
-                attaque_enemy(gamers[0], pygame.mouse.get_pos())
+                attaque_enemy(gamers[0], pygame.mouse.get_pos(), time)
                 mx, my = pygame.mouse.get_pos()
+
         elif evenement.type == pygame.KEYDOWN:
             if evenement.key == pygame.K_SPACE:
                 gamer['shield']['exist'] = True
-            else:
+        elif evenement.type == pygame.KEYUP:
+            if evenement.key == pygame.K_SPACE:
                 gamer['shield']['exist'] = False
 
 
@@ -472,7 +599,8 @@ def level():
 
     return nb_morts // 5
 
-    ##### OBJECTS INIT #####
+
+##### OBJECTS INIT #####
 
 
 pygame.init()
@@ -506,6 +634,10 @@ imgDecor3 = pygame.transform.scale(imgDecor3, DECOR_SIZE)
 imgShield = pygame.image.load(path + 'Bouclier.png').convert_alpha(fenetre)
 imgShield = pygame.transform.scale(imgShield, SHIELD_SIZE)
 
+imgGun = pygame.image.load(path + 'Attaque.png').convert_alpha(fenetre)
+imgGun = pygame.transform.scale(imgGun, GUN_SIZE)
+imgGun = pygame.transform.rotate(imgGun, -90)
+
 # Personage
 gamer = new_entity('gamer')
 
@@ -535,13 +667,13 @@ nb_morts = 0
 while not fini:
     actualTime = pygame.time.get_ticks()
     levelGamer = level()
-    traite_entrees()
+    traite_entrees(actualTime)
     fenetre.fill(GREY)
     draw_all()
 
     # Déplacement
     for enemy in enemies:
-        move_ennemy(enemy)
+        move_ennemy(enemy, actualTime)
 
     if mouse_clicked:
         move_gamer(gamers[0])
@@ -550,6 +682,10 @@ while not fini:
     generate(decor1Generator, levelGamer, actualTime)
     generate(decor2Generator, levelGamer, actualTime)
     generate(decor3Generator, levelGamer, actualTime)
+
+    for decor in decors:
+        if (decor['type'] == "decor2"):
+            collisions_deco(gamer, decor)
 
     pygame.display.flip()
     temps.tick(50)

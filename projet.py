@@ -20,6 +20,8 @@ SPEED_MIN = 5
 DIST_MAX = 200
 
 FIGURE_SIZE = (90, 115)
+SHIELD_SIZE = (100, 120)
+GUN_SIZE = (100, 120)
 DECOR_SIZE = (300, 300)
 
 
@@ -31,11 +33,12 @@ def new_entity(type):
     '''
     Créer une entité
 
-    :param type: "gamer", "enemy", "decor1", "decor2", "decor3"
+    :param type: "gamer", "enemy", "decor1", "decor2", "decor3", "shield", "gun"
     :return:
     '''
     size = [0, 0]
-
+    size_shield = SHIELD_SIZE
+    size_gun = GUN_SIZE
     if type == "gamer" or type == "enemy":
         size = FIGURE_SIZE
     elif type == "decor1":
@@ -50,6 +53,18 @@ def new_entity(type):
         'color': None,
         'actualImg': None,
         'life': 100,
+        'R': 300, # Radius of vison
+        'shield':{
+            'exist':False,
+            'size' : size_shield,
+            'position': None
+        },
+       'gun':{
+            'exist':False,
+            'size' : size_gun,
+            'position': None
+        }
+
     }
 
 
@@ -208,9 +223,17 @@ def move_gamer(entity):
         entity['position'][1] += vy
 
 
+inVision = False
+deplace_dist = 50
+randx = 2
+randy = 2
 def move_ennemy(entity):
+    global inVision, deplace_dist, randx, randy
     '''
-    Déplace l'ennemi
+    Déplace l'ennemi en verifiant si le personnage est dans son champ de vision ou pas
+        1) Si dans le champ de vision ( inVision == True) : il avance vers gamer avec la vitese de gamer // 2
+        2) Si pas dans le champ de vision( inVision == False) : il se deplace sur une distance de 50 pixels avec une vitesse qui varie entre -2 et 2
+
 
     :param entity:
     '''
@@ -218,10 +241,57 @@ def move_ennemy(entity):
     # Calule la distance entre l'ennemis et le joueur
     gamer = gamers[0]
     dist = tuple(x - y for x, y in zip(get_position(gamer), get_position(entity)))  # différence entre deux tuples
-
+    margin = gamer['size'][0]
+    # pprint(dist)
     # Determine la vitesse
+    #Verifie champ de vision
+    if(dist[0] > entity['R'] ):
+        inVision = False
+    elif(dist[1] > entity['R']):
+        inVision = False
+    elif(dist[0] <= entity['R']):
+        inVision = True
+    elif(dist[1] <= entity['R']):
+        inVision = True
+
+    if(inVision == True):  # In the vision field
+        vitessex = speed(entity, (gamer['position'][0] - entity['size'][0]), 0)/2.0
+        vitessey = speed(entity, gamer['position'][1], 1)/2.0
+        if(entity['position'][0] < (gamer['position'][0] - margin)):
+            if (vitessex < 0):
+                vitessex *= -1
+        elif(entity['position'][0] > (gamer['position'][0] + margin)):
+            if (vitessex > 0):
+                vitessex *= -1
+        else:
+            vitessex = 0
+
+        if(entity['position'][1] < (gamer['position'][1] )):
+            if (vitessey < 0):
+                vitessey *= -1
+        elif(entity['position'][1] > (gamer['position'][1] )):
+            if (vitessey > 0):
+                vitessey *= -1
+        else:
+            vitessey = 0
+    elif(inVision == False):    # Not in the vision field
+        if(deplace_dist <= 0):
+            deplace_dist = 50
+            if(entity['position'][0] < 0):
+                randx = random.randint(1, 2)
+            elif(entity['position'][1] < 0):
+                randy = random.randint(1, 2)
+            else:
+                randx = random.randint(-2, 2)
+                randy = random.randint(-2, 2)
+        if(deplace_dist > 0):
+            deplace_dist -= 1
+        vitessex = randx
+        vitessey = randy
 
     # Applique le déplacement
+    entity['position'][0] += vitessex
+    entity['position'][1] += vitessey
 
 
 #### Fin DÉPLACEMENT #####
@@ -296,6 +366,9 @@ def traite_entrees():
         elif evenement.type == pygame.MOUSEBUTTONDOWN and evenement.button == MOUSE_LEFT:
             mouse_clicked = True
             mx, my = pygame.mouse.get_pos()
+        elif evenement.type == pygame.KEYDOWN:
+            if evenement.key == pygame.K_SPACE:
+                gamer['shield']['exit'] = True
 
 
 def draw_all():
@@ -346,6 +419,9 @@ imgDecor2 = pygame.transform.scale(imgDecor2, DECOR_SIZE)
 
 imgDecor3 = pygame.image.load(path + 'Decor_3.png').convert_alpha(fenetre)
 imgDecor3 = pygame.transform.scale(imgDecor3, DECOR_SIZE)
+
+imgShield = pygame.image.load(path + 'Bouclier.png').convert_alpha(fenetre)
+imgShield = pygame.transform.scale(imgShield, SHIELD_SIZE)
 
 # Personage
 gamer = new_entity('gamer')
@@ -398,6 +474,7 @@ while not fini:
     traite_entrees()
     fenetre.fill(GREY)
     draw_all()
+    move_ennemy(enemy1)
     if (mouse_clicked == True):
         move_gamer(gamer)
         move_ennemy(enemy1)

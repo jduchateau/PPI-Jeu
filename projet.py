@@ -39,12 +39,17 @@ def new_entity(type):
     :return:
     '''
     size = [0, 0]
+    life = 0
     size_shield = SHIELD_SIZE
     size_gun = GUN_SIZE
 
     extra = {}
-    if type == "gamer" or type == "enemy":
+    if type == "gamer":
         size = FIGURE_SIZE
+        life = 100
+    elif type == "enemy":
+        size = FIGURE_SIZE
+        life = 10
     elif type == "decor1":
         size = DECOR_SIZE
 
@@ -62,7 +67,7 @@ def new_entity(type):
         'speed': [0, 0],
         'color': None,
         'actualImg': None,
-        'life': 100,
+        'life': life,
         'R': 300,  # Radius of vison
         'shield': {
             'exist': False,
@@ -394,13 +399,17 @@ def attaque(entity, target, time):
     if dist < MARGIN:
         entity['gun']['exist'] = True
         entity['gun']['end'] = time + 500
+        target['life']
+
 
 def auto_attaque():
     '''
 
     :return:
     '''
-def attaque_enemy(gamer, mouseposition):
+
+
+def attaque_enemy(gamer, mouseposition, time):
     '''
     Attaque l'enemy dans la direction donné par la souris
     :param gamer:
@@ -408,8 +417,14 @@ def attaque_enemy(gamer, mouseposition):
     :return:
     '''
 
-    direction = mouseposition[0]-gamer['position'][1], mouseposition[1]-gamer['position'][0]
+    targetPoint = mouseposition[0], mouseposition[1]
 
+    # Trouver l'ennemi dans cette direction
+    for enemy in enemies:
+        if abs(targetPoint[0] - enemy['position'][0]) < MARGIN and abs(targetPoint[1] - enemy['position'][1]) < MARGIN:
+            target = enemy
+
+            attaque(gamer, target, time)
 
 
 ##### Début Attaque #####

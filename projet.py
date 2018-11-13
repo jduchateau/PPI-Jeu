@@ -2,6 +2,7 @@ from pprint import pprint
 
 import pygame
 import math
+import random
 
 ##### VARIABLES & CONSTANTES #####
 
@@ -28,6 +29,7 @@ DECOR_SIZE = (300, 300)
 #### Début ENTITE #####
 def new_entity(type):
     '''
+    Créer une entité
 
     :param type: "gamer", "enemy", "decor1", "decor2", "decor3"
     :return:
@@ -47,7 +49,7 @@ def new_entity(type):
         'speed': [0, 0],
         'color': None,
         'actualImg': None,
-        'life': 100
+        'life': 100,
     }
 
 
@@ -216,7 +218,6 @@ def move_ennemy(entity):
     # Calule la distance entre l'ennemis et le joueur
     gamer = gamers[0]
     dist = tuple(x - y for x, y in zip(get_position(gamer), get_position(entity)))  # différence entre deux tuples
-    pprint(dist)
 
     # Determine la vitesse
 
@@ -229,17 +230,26 @@ def move_ennemy(entity):
 
 ##### Début GÉNÉRATEUR ######
 
-def new_generator():
+def new_generator(type, frequency, zone, image):
     '''
+    Créer un générateur
 
+    :param type: "enemy", "decor1", "decor2", "decor3"
+    :param frequency: frequence de base en miliseconde
+    :param zone: "edge", "all"
+    :param image: Surface
     :return:
     '''
     return {
-        ""
+        "type": type,
+        "frequency": frequency,
+        "zone": zone,
+        "new_time": 0,
+        "image": image
     }
 
 
-def generate(generator, level):
+def generate(generator, level, time):
     '''
 
     :param generator:
@@ -247,8 +257,36 @@ def generate(generator, level):
     :return:
     '''
 
+    global gamers, enemies, decors
 
-##### Fin GÉNÉRATEUR ######
+    if generator['new_time'] < time:
+        print('True')
+        # Nouveau temps
+        new_time = time + generator["frequency"] - level / 1000
+        generator['new_time'] = new_time
+
+        # Choisi l'emplacelent
+        position = (0, 0)
+        if generator['zone'] == 'edge':
+            if random.randint(0, 1):
+                position = (0, random.randint(0, WINDOWS_SIZE[1]))
+            else:
+                position = (random.randint(0, WINDOWS_SIZE[0]), 0)
+        elif generator['new_time'] < time:
+            position = (random.randint(0, WINDOWS_SIZE[0]), random.randint(0, WINDOWS_SIZE[1]))
+
+        entity = new_entity(generator['type'])
+        set_position(entity, position)
+        set_image(entity, generator['image'])
+        visible(entity)
+
+        if generator['type'] == 'enemy':
+            enemies.append(entity)
+        elif generator['type'] in ['decor1', 'decor2', 'decor3']:
+            decors.append(entity)
+
+    ##### Fin GÉNÉRATEUR ######
+
 
 def traite_entrees():
     global fini, mouse_clicked, mx, my
@@ -279,8 +317,9 @@ def level():
 
     return nb_morts // 5
 
+    ##### OBJECTS INIT #####
 
-##### OBJECTS INIT #####
+
 pygame.init()
 
 fenetre = pygame.display.set_mode(WINDOWS_SIZE)
@@ -334,6 +373,12 @@ visible(decor1)
 
 decors.append(decor1)
 
+# Generateurs
+enemiesGenerator = new_generator('enemy', 2 * 1000, 'edge', imgE2Ennemis)
+decor1Generator = new_generator('decor1', 5 * 1000, 'all', imgDecor1)
+decor2Generator = new_generator('decor2', 10 * 1000, 'all', imgDecor2)
+decor3Generator = new_generator('decor3', 10 * 1000, 'all', imgDecor3)
+
 ##### OBJECTS INI END #####
 
 ##### VARIABLES #####
@@ -347,12 +392,19 @@ nb_morts = 0
 
 ##### THE MAIN WHILE #####
 while not fini:
+
+    actualTime = pygame.time.get_ticks()
+    levelGamer = level()
     traite_entrees()
     fenetre.fill(GREY)
     draw_all()
     if (mouse_clicked == True):
         move_gamer(gamer)
         move_ennemy(enemy1)
+
+        generate(enemiesGenerator, levelGamer, actualTime)
+        generate(decor1Generator, levelGamer, actualTime)
+
     pygame.display.flip()
     temps.tick(50)
 

@@ -21,8 +21,10 @@ DIST_MAX = 200
 
 FIGURE_SIZE = (90, 115)
 SHIELD_SIZE = (100, 120)
-GUN_SIZE = (100, 120)
+GUN_SIZE = (83, 114)
 DECOR_SIZE = (300, 300)
+
+MARGIN = 10
 
 
 ##### FONCTIONS #####
@@ -65,12 +67,13 @@ def new_entity(type):
         'shield': {
             'exist': False,
             'size': size_shield,
-            'position': [0,0]
+            'position': [0, 0]
         },
         'gun': {
             'exist': False,
             'size': size_gun,
-            'position': None
+            'position': None,
+            'end': 0
         },
         'enemy': extra,
 
@@ -373,11 +376,46 @@ def generate(generator, level, time):
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:
             decors.append(entity)
             # Supprime ancien décor en surplut
-            if len(decors) > 2:
+            if len(decors) > 5:
                 del decors[0]
 
 
 ##### Fin GÉNÉRATEUR ######
+
+def attaque(entity, target, time):
+    global nb_morts
+
+    # Distence entre les deux
+    dist = math.sqrt(
+        (target['position'][0] - entity['position'][0]) ** 2
+        + (target['position'][1] - entity['position'][1]) ** 2
+    )
+
+    if dist < MARGIN:
+        entity['gun']['exist'] = True
+        entity['gun']['end'] = time + 500
+
+def auto_attaque():
+    '''
+
+    :return:
+    '''
+def attaque_enemy(gamer, mouseposition):
+    '''
+    Attaque l'enemy dans la direction donné par la souris
+    :param gamer:
+    :param mouseposition:
+    :return:
+    '''
+
+    direction = mouseposition[0]-gamer['position'][1], mouseposition[1]-gamer['position'][0]
+
+
+
+##### Début Attaque #####
+
+
+##### Fin Attaque #####
 
 
 def traite_entrees():
@@ -385,14 +423,20 @@ def traite_entrees():
     for evenement in pygame.event.get():
         if evenement.type == pygame.QUIT:
             fini = True
-        elif evenement.type == pygame.MOUSEBUTTONDOWN and evenement.button == MOUSE_LEFT:
-            mouse_clicked = True
-            mx, my = pygame.mouse.get_pos()
+        elif evenement.type == pygame.MOUSEBUTTONDOWN:
+            if evenement.button == MOUSE_LEFT:
+                mouse_clicked = True
+                mx, my = pygame.mouse.get_pos()
+            elif evenement.button == MOUSE_RIGHT:
+
+                attaque_enemy(gamers[0], pygame.mouse.get_pos())
+                mx, my = pygame.mouse.get_pos()
         elif evenement.type == pygame.KEYDOWN:
             if evenement.key == pygame.K_SPACE:
                 gamer['shield']['exist'] = True
             else:
                 gamer['shield']['exist'] = False
+
 
 def draw_all():
     global gamers, enemies, decors
@@ -417,6 +461,7 @@ def level():
 
 
 pygame.init()
+pygame.key.set_repeat(0, 10)
 
 fenetre = pygame.display.set_mode(WINDOWS_SIZE)
 pygame.display.set_caption('Battail dans le vide')
@@ -457,8 +502,8 @@ gamers.append(gamer)
 # Generateurs
 enemiesGenerator = new_generator('enemy', 5 * 1000, 'edge', imgE2Ennemis)
 decor1Generator = new_generator('decor1', 5 * 1000, 'all', imgDecor1)
-decor2Generator = new_generator('decor2', 5 * 1000, 'all', imgDecor2)
-decor3Generator = new_generator('decor3', 5 * 1000, 'all', imgDecor3)
+decor2Generator = new_generator('decor2', 10 * 1000, 'all', imgDecor2)
+decor3Generator = new_generator('decor3', 10 * 1000, 'all', imgDecor3)
 
 ##### OBJECTS INI END #####
 
@@ -468,7 +513,7 @@ mx = 0
 my = 0
 mouse_clicked = False
 fini = False
-shield_position =(gamer['position'][0], gamer['position'][1])
+shield_position = (gamer['position'][0], gamer['position'][1])
 nb_morts = 0
 
 ##### THE MAIN WHILE #####
@@ -488,6 +533,8 @@ while not fini:
 
     generate(enemiesGenerator, levelGamer, actualTime)
     generate(decor1Generator, levelGamer, actualTime)
+    generate(decor2Generator, levelGamer, actualTime)
+    generate(decor3Generator, levelGamer, actualTime)
 
     pygame.display.flip()
     temps.tick(50)

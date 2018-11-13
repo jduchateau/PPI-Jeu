@@ -39,10 +39,18 @@ def new_entity(type):
     size = [0, 0]
     size_shield = SHIELD_SIZE
     size_gun = GUN_SIZE
+
+    extra = {}
     if type == "gamer" or type == "enemy":
         size = FIGURE_SIZE
     elif type == "decor1":
         size = DECOR_SIZE
+
+    if type == "enemy":
+        extra = {'inVision': False,
+                 'deplace_dist': 50,
+                 'randx': 2,
+                 'randy': 2}
 
     return {
         'type': type,
@@ -53,17 +61,18 @@ def new_entity(type):
         'color': None,
         'actualImg': None,
         'life': 100,
-        'R': 300, # Radius of vison
-        'shield':{
-            'exist':False,
-            'size' : size_shield,
+        'R': 300,  # Radius of vison
+        'shield': {
+            'exist': False,
+            'size': size_shield,
             'position': None
         },
-       'gun':{
-            'exist':False,
-            'size' : size_gun,
+        'gun': {
+            'exist': False,
+            'size': size_gun,
             'position': None
-        }
+        },
+        'enemy': extra,
 
     }
 
@@ -95,7 +104,7 @@ def set_position(entity, x, y=None):
         entity['position'][0] = x
         entity['position'][1] = y
     else:
-        entity['position'] = x
+        entity['position'] = list(x)
 
 
 def get_position(entity, round=False):
@@ -223,10 +232,6 @@ def move_gamer(entity):
         entity['position'][1] += vy
 
 
-inVision = False
-deplace_dist = 50
-randx = 2
-randy = 2
 def move_ennemy(entity):
     global inVision, deplace_dist, randx, randy
     '''
@@ -237,54 +242,58 @@ def move_ennemy(entity):
 
     :param entity:
     '''
+    inVision = entity['enemy']['inVision']
+    deplace_dist = entity['enemy']['deplace_dist']
+    randx = entity['enemy']['randx']
+    randy = entity['enemy']['randy']
 
     # Calule la distance entre l'ennemis et le joueur
     gamer = gamers[0]
     dist = tuple(x - y for x, y in zip(get_position(gamer), get_position(entity)))  # différence entre deux tuples
     margin = gamer['size'][0]
-    # pprint(dist)
+
     # Determine la vitesse
-    #Verifie champ de vision
-    if(dist[0] > entity['R'] ):
+    # Verifie champ de vision
+    if (dist[0] > entity['R']):
         inVision = False
-    elif(dist[1] > entity['R']):
+    elif (dist[1] > entity['R']):
         inVision = False
-    elif(dist[0] <= entity['R']):
+    elif (dist[0] <= entity['R']):
         inVision = True
-    elif(dist[1] <= entity['R']):
+    elif (dist[1] <= entity['R']):
         inVision = True
 
-    if(inVision == True):  # In the vision field
-        vitessex = speed(entity, (gamer['position'][0] - entity['size'][0]), 0)/2.0
-        vitessey = speed(entity, gamer['position'][1], 1)/2.0
-        if(entity['position'][0] < (gamer['position'][0] - margin)):
+    if (inVision == True):  # In the vision field
+        vitessex = speed(entity, (gamer['position'][0] - entity['size'][0]), 0) / 2.0
+        vitessey = speed(entity, gamer['position'][1], 1) / 2.0
+        if (entity['position'][0] < (gamer['position'][0] - margin)):
             if (vitessex < 0):
                 vitessex *= -1
-        elif(entity['position'][0] > (gamer['position'][0] + margin)):
+        elif (entity['position'][0] > (gamer['position'][0] + margin)):
             if (vitessex > 0):
                 vitessex *= -1
         else:
             vitessex = 0
 
-        if(entity['position'][1] < (gamer['position'][1] )):
+        if (entity['position'][1] < (gamer['position'][1])):
             if (vitessey < 0):
                 vitessey *= -1
-        elif(entity['position'][1] > (gamer['position'][1] )):
+        elif (entity['position'][1] > (gamer['position'][1])):
             if (vitessey > 0):
                 vitessey *= -1
         else:
             vitessey = 0
-    elif(inVision == False):    # Not in the vision field
-        if(deplace_dist <= 0):
+    elif (inVision == False):  # Not in the vision field
+        if (deplace_dist <= 0):
             deplace_dist = 50
-            if(entity['position'][0] < 0):
+            if (entity['position'][0] < 0):
                 randx = random.randint(1, 2)
-            elif(entity['position'][1] < 0):
+            elif (entity['position'][1] < 0):
                 randy = random.randint(1, 2)
             else:
                 randx = random.randint(-2, 2)
                 randy = random.randint(-2, 2)
-        if(deplace_dist > 0):
+        if (deplace_dist > 0):
             deplace_dist -= 1
         vitessex = randx
         vitessey = randy
@@ -292,6 +301,11 @@ def move_ennemy(entity):
     # Applique le déplacement
     entity['position'][0] += vitessex
     entity['position'][1] += vitessey
+
+    entity['enemy']['inVision'] = inVision
+    entity['enemy']['deplace_dist'] = deplace_dist
+    entity['enemy']['randx'] = randx
+    entity['enemy']['randy'] = randy
 
 
 #### Fin DÉPLACEMENT #####
@@ -330,7 +344,6 @@ def generate(generator, level, time):
     global gamers, enemies, decors
 
     if generator['new_time'] < time:
-        print('True')
         # Nouveau temps
         new_time = time + generator["frequency"] - level / 1000
         generator['new_time'] = new_time
@@ -342,8 +355,9 @@ def generate(generator, level, time):
                 position = (0, random.randint(0, WINDOWS_SIZE[1]))
             else:
                 position = (random.randint(0, WINDOWS_SIZE[0]), 0)
-        elif generator['new_time'] < time:
+        elif generator['zone'] == 'all':
             position = (random.randint(0, WINDOWS_SIZE[0]), random.randint(0, WINDOWS_SIZE[1]))
+            pprint(position)
 
         entity = new_entity(generator['type'])
         set_position(entity, position)
@@ -354,8 +368,12 @@ def generate(generator, level, time):
             enemies.append(entity)
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:
             decors.append(entity)
+            # Supprime ancien décor en surplut
+            if len(decors) > 2:
+                del decors[0]
 
-    ##### Fin GÉNÉRATEUR ######
+
+##### Fin GÉNÉRATEUR ######
 
 
 def traite_entrees():
@@ -431,29 +449,11 @@ set_image(gamer, imgE1Joueur)
 visible(gamer)
 gamers.append(gamer)
 
-# Ennemi (artificiel)
-enemy1 = new_entity('ennemy')
-
-set_position(enemy1, 50, 50)
-set_image(enemy1, imgE2Ennemis)
-visible(enemy1)
-
-enemies.append(enemy1)
-
-# Decor (artificel)
-decor1 = new_entity('decor1')
-
-set_position(decor1, WINDOWS_SIZE[0] * 4 / 6, WINDOWS_SIZE[1] / 2)
-set_image(decor1, imgDecor1)
-visible(decor1)
-
-decors.append(decor1)
-
 # Generateurs
-enemiesGenerator = new_generator('enemy', 2 * 1000, 'edge', imgE2Ennemis)
+enemiesGenerator = new_generator('enemy', 5 * 1000, 'edge', imgE2Ennemis)
 decor1Generator = new_generator('decor1', 5 * 1000, 'all', imgDecor1)
-decor2Generator = new_generator('decor2', 10 * 1000, 'all', imgDecor2)
-decor3Generator = new_generator('decor3', 10 * 1000, 'all', imgDecor3)
+decor2Generator = new_generator('decor2', 5 * 1000, 'all', imgDecor2)
+decor3Generator = new_generator('decor3', 5 * 1000, 'all', imgDecor3)
 
 ##### OBJECTS INI END #####
 
@@ -468,19 +468,21 @@ nb_morts = 0
 
 ##### THE MAIN WHILE #####
 while not fini:
-
     actualTime = pygame.time.get_ticks()
     levelGamer = level()
     traite_entrees()
     fenetre.fill(GREY)
     draw_all()
-    move_ennemy(enemy1)
-    if (mouse_clicked == True):
-        move_gamer(gamer)
-        move_ennemy(enemy1)
 
-        generate(enemiesGenerator, levelGamer, actualTime)
-        generate(decor1Generator, levelGamer, actualTime)
+    # Déplacement
+    for enemy in enemies:
+        move_ennemy(enemy)
+
+    if mouse_clicked:
+        move_gamer(gamers[0])
+
+    generate(enemiesGenerator, levelGamer, actualTime)
+    generate(decor1Generator, levelGamer, actualTime)
 
     pygame.display.flip()
     temps.tick(50)

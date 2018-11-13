@@ -65,7 +65,7 @@ def new_entity(type):
         'shield': {
             'exist': False,
             'size': size_shield,
-            'position': None
+            'position': [0,0]
         },
         'gun': {
             'exist': False,
@@ -170,6 +170,10 @@ def draw(entity, ecran):
         pygame.draw.rect(ecran, entity['color'], (entity['position'], entity['size']))
     elif get_image(entity):
         ecran.blit(get_image(entity), get_position(entity, True))
+    if entity['shield']['exist'] == True and entity['type'] == "gamer":
+        entity['shield']['position'][0] = entity['position'][0] - 5
+        entity['shield']['position'][1] = entity['position'][1]
+        ecran.blit(imgShield, (entity['shield']['position']))
 
 
 ### Début DÉPLACEMENT ####
@@ -386,8 +390,9 @@ def traite_entrees():
             mx, my = pygame.mouse.get_pos()
         elif evenement.type == pygame.KEYDOWN:
             if evenement.key == pygame.K_SPACE:
-                gamer['shield']['exit'] = True
-
+                gamer['shield']['exist'] = True
+            else:
+                gamer['shield']['exist'] = False
 
 def draw_all():
     global gamers, enemies, decors
@@ -463,7 +468,7 @@ mx = 0
 my = 0
 mouse_clicked = False
 fini = False
-
+shield_position =(gamer['position'][0], gamer['position'][1])
 nb_morts = 0
 
 ##### THE MAIN WHILE #####

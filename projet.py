@@ -29,6 +29,15 @@ MARGIN = 100
 
 ##### FONCTIONS #####
 
+# TODO
+#   barre de vie
+#   améliorer affichage attaque
+#       meilleur placement
+#       cacher après quelques secondes (Jakub)
+#   attaque automatique des ennemis (Jakub)
+#   emecher attaque en meme temps que bouclier
+#   gérer les collision avec les décors et les actions qui en découle
+
 
 #### Début ENTITE #####
 def new_entity(type):
@@ -497,7 +506,7 @@ def attaque(entity, target, time):
             direction += 180
 
         entity['gun']['direction'] = direction
-        set_position(entity['gun'], get_position(target)) #TODO à améliorer
+        set_position(entity['gun'], get_position(target))
 
         set_life(target, get_power(entity), True)
 

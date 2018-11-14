@@ -107,9 +107,10 @@ def active(entity):
     entity['active'] = True
 
 
-def inactive(entity, expiration):
+def inactive(entity, expiration=None):
     entity['active'] = False
-    entity['expiration'] = expiration
+    if expiration != None:
+        entity['expiration'] = expiration
 
 
 def is_active(entity):

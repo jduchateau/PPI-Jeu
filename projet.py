@@ -75,12 +75,12 @@ def new_entity(type):
         'power': power,
         'R': 300,  # Radius of vison
         'shield': {
-            'exist': False,
+            'active': False,
             'size': size_shield,
             'position': [0, 0]
         },
         'gun': {
-            'exist': False,
+            'active': False,
             'size': size_gun,
             'position': None,
             'end': 0,
@@ -244,12 +244,12 @@ def draw(entity, ecran):
     elif get_image(entity):
         ecran.blit(get_image(entity), get_position(entity, True))
 
-    if entity['shield']['exist'] == True and entity['type'] == "gamer":
+    if is_active(entity['shield']) and entity['type'] == "gamer":
         entity['shield']['position'][0] = entity['position'][0] - 5
         entity['shield']['position'][1] = entity['position'][1]
         ecran.blit(imgShield, (entity['shield']['position']))
 
-    if entity['gun']['exist']:
+    if is_active(entity['gun']):
         imgGunRotated = pygame.transform.rotate(imgGun, entity['gun']['direction'])
         ecran.blit(imgGunRotated, entity['gun']['position'])
 
@@ -484,7 +484,7 @@ def attaque(entity, target, time):
     if dist < MARGIN:
         print('!!! Attaque !!! ')
 
-        entity['gun']['exist'] = True
+        active(entity['gun'])
         entity['gun']['end'] = time + delait
 
         # Calcule la direction et la position de l'image
@@ -496,7 +496,7 @@ def attaque(entity, target, time):
             direction += 180
 
         entity['gun']['direction'] = direction
-        entity['gun']['position'] = get_position(target)
+        set_position(entity['gun'], get_position(target)) #TODO à améliorer
 
         set_life(target, get_power(entity), True)
 
@@ -574,10 +574,10 @@ def traite_entrees(time):
 
         elif evenement.type == pygame.KEYDOWN:
             if evenement.key == pygame.K_SPACE:
-                gamer['shield']['exist'] = True
+                active(gamer['shield']) # gamer['shield']['active'] = True
         elif evenement.type == pygame.KEYUP:
             if evenement.key == pygame.K_SPACE:
-                gamer['shield']['exist'] = False
+                inactive(gamer['shield']) # gamer['shield']['active'] = False
 
 
 def draw_all():

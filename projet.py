@@ -36,7 +36,8 @@ MARGIN = 100
 #       cacher après quelques secondes (Jakub)
 #   attaque automatique des ennemis (Jakub)
 #   emecher attaque en meme temps que bouclier
-#   gérer les collision avec les décors et les actions qui en découle
+#   gérer les collision avec les décors (Raul)
+#       et les actions qui en découle (Raul)
 
 
 #### Début ENTITE #####
@@ -264,6 +265,8 @@ def draw(entity, ecran):
         ecran.blit(imgGunRotated, entity['gun']['position'])
 
 
+##### FIN ENTITE ######
+
 ### Début DÉPLACEMENT ####
 
 def speed(entity, point, axe):
@@ -411,8 +414,6 @@ def move_ennemy(entity, actualTime):
 
 
 #### Fin DÉPLACEMENT #####
-
-##### FIN ENTITE ######
 
 ##### Début GÉNÉRATEUR ######
 
@@ -568,7 +569,7 @@ def collisions_deco(entity, second):
 ##### Fin collisions #####
 
 def traite_entrees(time):
-    global fini, mouse_clicked, mx, my
+    global fini, mx, my
     for evenement in pygame.event.get():
 
         if evenement.type == pygame.QUIT:
@@ -576,7 +577,6 @@ def traite_entrees(time):
 
         elif evenement.type == pygame.MOUSEBUTTONDOWN:
             if evenement.button == MOUSE_LEFT:
-                mouse_clicked = True
                 mx, my = pygame.mouse.get_pos()
             elif evenement.button == MOUSE_RIGHT:
                 attaque_enemy(gamers[0], pygame.mouse.get_pos(), time)
@@ -584,10 +584,10 @@ def traite_entrees(time):
 
         elif evenement.type == pygame.KEYDOWN:
             if evenement.key == pygame.K_SPACE:
-                active(gamer['shield']) # gamer['shield']['active'] = True
+                active(gamer['shield'])  # gamer['shield']['active'] = True
         elif evenement.type == pygame.KEYUP:
             if evenement.key == pygame.K_SPACE:
-                inactive(gamer['shield']) # gamer['shield']['active'] = False
+                inactive(gamer['shield'])  # gamer['shield']['active'] = False
 
 
 def draw_all():
@@ -666,9 +666,8 @@ decor3Generator = new_generator('decor3', 10 * 1000, 'all', imgDecor3)
 
 ##### VARIABLES #####
 temps = pygame.time.Clock()
-mx = 0
-my = 0
-mouse_clicked = False
+mx = WINDOWS_SIZE[0] / 2
+my = WINDOWS_SIZE[1] / 2
 fini = False
 shield_position = (gamer['position'][0], gamer['position'][1])
 nb_morts = 0
@@ -685,8 +684,7 @@ while not fini:
     for enemy in enemies:
         move_ennemy(enemy, actualTime)
 
-    if mouse_clicked:
-        move_gamer(gamers[0])
+    move_gamer(gamers[0])
 
     generate(enemiesGenerator, levelGamer, actualTime)
     generate(decor1Generator, levelGamer, actualTime)

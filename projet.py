@@ -162,7 +162,7 @@ def get_position(entity, round=False):
     if round:
         return int(entity['position'][0]), int(entity['position'][1])
 
-    return tuple(entity['position'])
+    return entity['position']
 
 
 def set_size(entity, w, h=None):
@@ -478,7 +478,16 @@ def generate(generator, level, time):
 ##### Fin GÉNÉRATEUR ######
 
 ##### Début Attaque #####
-def attaque(entity, target, time):
+def attaque(entity, target, time, addMort = True):
+    '''
+    Entity attaque target
+
+    :param entity: entité à l'origine de l'attaque
+    :param target: cible de l'attaque
+    :param time: int
+    :param addMort: incrémente nb_mort si vrai
+    :return:
+    '''
     global nb_morts
 
     delait = 800
@@ -510,20 +519,35 @@ def attaque(entity, target, time):
         set_position(entity['gun'], get_position(target))
 
         set_life(target, get_power(entity), True)
+        pprint({'Vie': get_life(target)})
 
         # Mort
         if get_life(target) <= 0:
-            nb_morts += 1
-            pprint({'Nombre de morts': nb_morts})
+            if addMort:
+                nb_morts += 1
+                pprint({'Nombre de morts': nb_morts})
 
             inactive(target, time + delait)
 
 
-def auto_attaque():
+def auto_attaque(ennemies, gamer, time):
+    '''
+    Les ennemies attaque le joueur
+
+    :param ennemies: list
+    :param gamer: entity
+    :param time: int
     '''
 
-    :return:
-    '''
+    for i in range(len(ennemies)):
+        delta_x = get_position(gamer)[0] - get_position(ennemies[i])[0]
+        delta_y = get_position(gamer)[1] - get_position(ennemies[i])[1]
+        dist = math.sqrt(delta_x ** 2 + delta_y ** 2)
+
+        if dist < MARGIN and is_active(ennemies[i]) and is_visible(ennemies[i]):
+            print('Attaque :::')
+            attaque(ennemies[i], gamer, time)
+            print(get_life(gamer))
 
 
 def attaque_enemy(gamer, mouseposition, time):
@@ -537,13 +561,11 @@ def attaque_enemy(gamer, mouseposition, time):
     targetPoint = mouseposition
     pprint(targetPoint)
 
-    print('Recherche...')
     # Trouver l'ennemi dans cette direction
     for i in range(len(enemies)):
         if abs(targetPoint[0] - get_position(enemies[i])[0]) < MARGIN \
                 and abs(targetPoint[1] - get_position(enemies[i])[1]) < MARGIN \
                 and is_visible(enemies[i]):
-            print('... Trouvé')
             attaque(gamer, enemies[i], time)
 
 
@@ -584,10 +606,10 @@ def traite_entrees(time):
 
         elif evenement.type == pygame.KEYDOWN:
             if evenement.key == pygame.K_SPACE:
-                active(gamer['shield'])  # gamer['shield']['active'] = True
+                active(gamers[0]['shield'])  # gamer['shield']['active'] = True
         elif evenement.type == pygame.KEYUP:
             if evenement.key == pygame.K_SPACE:
-                inactive(gamer['shield'])  # gamer['shield']['active'] = False
+                inactive(gamers[0]['shield'])  # gamer['shield']['active'] = False
 
 
 def draw_all():
@@ -656,6 +678,8 @@ set_image(gamer, imgE1Joueur)
 visible(gamer)
 gamers.append(gamer)
 
+del gamer
+
 # Generateurs
 enemiesGenerator = new_generator('enemy', 5 * 1000, 'edge', imgE2Ennemis)
 decor1Generator = new_generator('decor1', 5 * 1000, 'all', imgDecor1)
@@ -669,7 +693,7 @@ temps = pygame.time.Clock()
 mx = WINDOWS_SIZE[0] / 2
 my = WINDOWS_SIZE[1] / 2
 fini = False
-shield_position = (gamer['position'][0], gamer['position'][1])
+shield_position = (gamers[0]['position'][0], gamers[0]['position'][1])
 nb_morts = 0
 
 ##### THE MAIN WHILE #####
@@ -686,6 +710,8 @@ while not fini:
 
     move_gamer(gamers[0])
 
+    auto_attaque(enemies, gamers[0], actualTime)
+
     generate(enemiesGenerator, levelGamer, actualTime)
     generate(decor1Generator, levelGamer, actualTime)
     generate(decor2Generator, levelGamer, actualTime)
@@ -693,7 +719,7 @@ while not fini:
 
     for decor in decors:
         if (decor['type'] == "decor2"):
-            collisions_deco(gamer, decor)
+            collisions_deco(gamers[0], decor)
 
     pygame.display.flip()
     temps.tick(50)

@@ -18,14 +18,15 @@ MOUSE_RIGHT = 3
 # Vitesse
 SPEED_MAX = 10
 SPEED_MIN = 5
-DIST_MAX = 200
+DIST_MOVE_MAX = 200
 
 FIGURE_SIZE = (90, 115)
 SHIELD_SIZE = (100, 120)
 GUN_SIZE = (83, 114)
 DECOR_SIZE = (300, 300)
 
-MARGIN = 100
+DIST_ATTACK_MAX = 120
+DIST_ENEMY_MIN = 90
 
 GAUGE_SIZE = 100, 30
 GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - 50, 50
@@ -69,7 +70,7 @@ def new_entity(type):
     elif type == "enemy":
         size = FIGURE_SIZE
         life = 10
-        power = 5
+        power = 0.5
     elif type == "decor1":
         size = DECOR_SIZE
 
@@ -240,7 +241,7 @@ def set_life(entity, life, relatif):
     :return:
     '''
     if relatif:
-        entity['life'] -= life
+        entity['life'] += life
     else:
         entity['life'] = life
 
@@ -289,9 +290,9 @@ def speed(entity, point, axe):
     dist_min = entity['size'][0] // 2
     dist = abs((entity['position'][axe] + entity['size'][axe] // 2) - point)
 
-    if (dist >= dist_min and dist <= DIST_MAX):
-        speed = int(1 / (1 + math.exp(-(dist * 6 / DIST_MAX))) * SPEED_MAX)
-    elif (dist > DIST_MAX):
+    if (dist >= dist_min and dist <= DIST_MOVE_MAX):
+        speed = int(1 / (1 + math.exp(-(dist * 6 / DIST_MOVE_MAX))) * SPEED_MAX)
+    elif (dist > DIST_MOVE_MAX):
         speed = SPEED_MAX
     else:
         if ((entity['position'][axe] + entity['size'][axe] // 2) != point):
@@ -335,7 +336,6 @@ def move_gamer(entity):
 
 
 def move_ennemy(entity, actualTime):
-    global inVision, deplace_dist, randx, randy
     '''
     Déplace l'ennemi en verifiant si le personnage est dans son champ de vision ou pas
         1) Si dans le champ de vision ( inVision == True) : il avance vers gamer avec la vitese de gamer // 2
@@ -362,7 +362,7 @@ def move_ennemy(entity, actualTime):
     # Calule la distance entre l'ennemis et le joueur
     gamer = gamers[0]
     dist = tuple(x - y for x, y in zip(get_position(gamer), get_position(entity)))  # différence entre deux tuples
-    margin = gamer['size'][0]
+    margin = DIST_ENEMY_MIN
 
     # Determine la vitesse
     # Verifie champ de vision
@@ -485,7 +485,7 @@ def generate(generator, level, time):
 ##### Fin GÉNÉRATEUR ######
 
 ##### Début Attaque #####
-def attaque(entity, target, time, addMort=True):
+def attack(entity, target, time, addMort=True):
     '''
     Entity attaque target
 
@@ -497,8 +497,9 @@ def attaque(entity, target, time, addMort=True):
     '''
     global nb_morts
 
-    delait = 800
-    if not is_visible(target) or not is_active(target):
+    delait = 800 #ms
+    if not is_visible(target) or not is_active(target) \
+            or is_active(entity['shield']):
         return False
 
     # Distence entre les deux
@@ -508,7 +509,7 @@ def attaque(entity, target, time, addMort=True):
 
     print('Attaque ? ' + str(dist))
 
-    if dist < MARGIN:
+    if dist < DIST_ATTACK_MAX:
         print('!!! Attaque !!! ')
 
         active(entity['gun'])
@@ -525,7 +526,7 @@ def attaque(entity, target, time, addMort=True):
         entity['gun']['direction'] = direction
         set_position(entity['gun'], get_position(target))
 
-        set_life(target, get_power(entity), True)
+        set_life(target, -get_power(entity), True)
         pprint({'Vie': get_life(target)})
 
         # Mort
@@ -537,7 +538,7 @@ def attaque(entity, target, time, addMort=True):
             inactive(target, time + delait)
 
 
-def auto_attaque(ennemies, gamer, time):
+def auto_attack(ennemies, gamer, time):
     '''
     Les ennemies attaque le joueur
 
@@ -551,13 +552,12 @@ def auto_attaque(ennemies, gamer, time):
         delta_y = get_position(gamer)[1] - get_position(ennemies[i])[1]
         dist = math.sqrt(delta_x ** 2 + delta_y ** 2)
 
-        if dist < MARGIN and is_active(ennemies[i]) and is_visible(ennemies[i]):
-            print('Attaque :::')
-            attaque(ennemies[i], gamer, time)
+        if dist < DIST_ATTACK_MAX and is_active(ennemies[i]) and is_visible(ennemies[i]):
+            attack(ennemies[i], gamer, time)
             print(get_life(gamer))
 
 
-def attaque_enemy(gamer, mouseposition, time):
+def attack_enemy(gamer, mouseposition, time):
     '''
     Attaque l'enemy dans la direction donné par la souris
     :param gamer:
@@ -570,10 +570,10 @@ def attaque_enemy(gamer, mouseposition, time):
 
     # Trouver l'ennemi dans cette direction
     for i in range(len(enemies)):
-        if abs(targetPoint[0] - get_position(enemies[i])[0]) < MARGIN \
-                and abs(targetPoint[1] - get_position(enemies[i])[1]) < MARGIN \
+        if abs(targetPoint[0] - get_position(enemies[i])[0]) < DIST_ATTACK_MAX \
+                and abs(targetPoint[1] - get_position(enemies[i])[1]) < DIST_ATTACK_MAX \
                 and is_visible(enemies[i]):
-            attaque(gamer, enemies[i], time)
+            attack(gamer, enemies[i], time)
 
 
 ##### Fin Attaque #####
@@ -631,7 +631,7 @@ def traite_entrees(time):
             if evenement.button == MOUSE_LEFT:
                 mx, my = pygame.mouse.get_pos()
             elif evenement.button == MOUSE_RIGHT:
-                attaque_enemy(gamers[0], pygame.mouse.get_pos(), time)
+                attack_enemy(gamers[0], pygame.mouse.get_pos(), time)
                 mx, my = pygame.mouse.get_pos()
 
         elif evenement.type == pygame.KEYDOWN:
@@ -671,7 +671,6 @@ def lifeGamer():
 
 
 pygame.init()
-pygame.key.set_repeat(0, 10)
 
 fenetre = pygame.display.set_mode(WINDOWS_SIZE)
 pygame.display.set_caption('Battail dans le vide')
@@ -748,7 +747,7 @@ while not fini:
 
     move_gamer(gamers[0])
 
-    auto_attaque(enemies, gamers[0], actualTime)
+    auto_attack(enemies, gamers[0], actualTime)
 
     show_gauge(gaugeLife, fenetre)
 

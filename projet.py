@@ -35,6 +35,7 @@ GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - 50, 50
 ##### FONCTIONS #####
 
 # TODO
+#   menu d'accueil et d'explication
 #   après la mort du joueur afficher un message:
 #       recomencer une partie
 #       continuer à jouer (mode immortelle)
@@ -498,8 +499,9 @@ def attack(entity, target, time, addMort=True):
     global nb_morts
 
     delait = 800 #ms
+
     if not is_visible(target) or not is_active(target) \
-            or is_active(entity['shield']):
+            or is_active(target['shield']) or is_active(entity['shield']):
         return False
 
     # Distence entre les deux
@@ -621,7 +623,7 @@ def show_gauge(gauge, screen):
 ##### Fin JAUGE #####
 
 def traite_entrees(time):
-    global fini, mx, my
+    global fini, mx, my, gamers
     for evenement in pygame.event.get():
 
         if evenement.type == pygame.QUIT:
@@ -737,7 +739,9 @@ nb_morts = 0
 while not fini:
     actualTime = pygame.time.get_ticks()
     levelGamer = level()
+
     traite_entrees(actualTime)
+
     fenetre.fill(GREY)
     draw_all()
 

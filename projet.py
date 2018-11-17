@@ -34,6 +34,10 @@ GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - 50, 50
 ##### FONCTIONS #####
 
 # TODO
+#   après la mort du joueur afficher un message:
+#       recomencer une partie
+#       continuer à jouer (mode immortelle)
+#       quitter
 #   améliorer affichage attaque
 #       meilleur placement
 #       cacher après quelques secondes (Jakub)

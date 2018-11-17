@@ -9,7 +9,8 @@ import random
 WINDOWS_SIZE = (1000, 800)
 
 GREY = (198, 186, 183)
-BLACK_PERS = (52, 51, 50)
+BLACK = (52, 51, 50)
+RED = (255, 70, 70)
 
 MOUSE_LEFT = 1
 MOUSE_RIGHT = 3
@@ -26,11 +27,13 @@ DECOR_SIZE = (300, 300)
 
 MARGIN = 100
 
+GAUGE_SIZE = 100, 30
+GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - 50, 50
+
 
 ##### FONCTIONS #####
 
 # TODO
-#   barre de vie
 #   améliorer affichage attaque
 #       meilleur placement
 #       cacher après quelques secondes (Jakub)
@@ -478,7 +481,7 @@ def generate(generator, level, time):
 ##### Fin GÉNÉRATEUR ######
 
 ##### Début Attaque #####
-def attaque(entity, target, time, addMort = True):
+def attaque(entity, target, time, addMort=True):
     '''
     Entity attaque target
 
@@ -590,6 +593,29 @@ def collisions_deco(entity, second):
 
 ##### Fin collisions #####
 
+##### Définition JAUGE #####
+
+def new_gauge(rect, fct_value):
+    return {
+        'rect': rect,
+        'fct': fct_value
+    }
+
+
+def show_gauge(gauge, screen):
+    left = gauge['fct']()
+    if left < 0: left = 0
+    rect = gauge['rect']
+    witdh_death = int(rect.width * (100 - left) / 100)
+
+    if left < 100:
+        pygame.draw.rect(screen, RED, (rect.left, rect.top, witdh_death, rect.height))
+    if left > 0:
+        pygame.draw.rect(screen, BLACK, (rect.left + witdh_death, rect.top, rect.width - witdh_death, rect.height))
+
+
+##### Fin JAUGE #####
+
 def traite_entrees(time):
     global fini, mx, my
     for evenement in pygame.event.get():
@@ -630,6 +656,11 @@ def level():
     global nb_morts
 
     return nb_morts // 5
+
+
+def lifeGamer():
+    global gamers
+    return get_life(gamers[0])
 
 
 ##### OBJECTS INIT #####
@@ -686,6 +717,9 @@ decor1Generator = new_generator('decor1', 5 * 1000, 'all', imgDecor1)
 decor2Generator = new_generator('decor2', 10 * 1000, 'all', imgDecor2)
 decor3Generator = new_generator('decor3', 10 * 1000, 'all', imgDecor3)
 
+# Jauge de vie
+gaugeLife = new_gauge(pygame.Rect(GAUGE_POSITION[0], GAUGE_POSITION[1], GAUGE_SIZE[0], GAUGE_SIZE[1]), lifeGamer)
+
 ##### OBJECTS INI END #####
 
 ##### VARIABLES #####
@@ -711,6 +745,8 @@ while not fini:
     move_gamer(gamers[0])
 
     auto_attaque(enemies, gamers[0], actualTime)
+
+    show_gauge(gaugeLife, fenetre)
 
     generate(enemiesGenerator, levelGamer, actualTime)
     generate(decor1Generator, levelGamer, actualTime)

@@ -43,7 +43,6 @@ GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - 50, 50
 #   améliorer affichage attaque
 #       meilleur placement
 #       cacher après quelques secondes (Jakub)
-#   attaque automatique des ennemis (Jakub)
 #   emecher attaque en meme temps que bouclier
 #   gérer les collision avec les décors (Raul)
 #       et les actions qui en découle (Raul)

@@ -25,7 +25,8 @@ SHIELD_SIZE = (100, 120)
 GUN_SIZE = (83, 114)
 DECOR_SIZE = (300, 300)
 
-DIST_ATTACK_MAX = 120
+DIST_ATTACK_MAX = 120 #px
+ATTACK_DURATION = 500 #ms
 DIST_ENEMY_MIN = 90
 
 GAUGE_SIZE = 100, 30
@@ -42,10 +43,10 @@ GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - 50, 50
 #       quitter
 #   améliorer affichage attaque
 #       meilleur placement
-#       cacher après quelques secondes (Jakub)
 #   emecher attaque en meme temps que bouclier
 #   gérer les collision avec les décors (Raul)
 #       et les actions qui en découle (Raul)
+#       [https://stackoverflow.com/questions/24727773/detecting-rectangle-collision-with-a-circle]
 
 
 #### Début ENTITE #####
@@ -246,7 +247,7 @@ def set_life(entity, life, relatif):
         entity['life'] = life
 
 
-def draw(entity, ecran):
+def draw(entity, ecran, time):
     '''
     Dessine l'entité sur la fenetre selon les parametres de celle ci.
 
@@ -267,6 +268,10 @@ def draw(entity, ecran):
         entity['shield']['position'][0] = entity['position'][0] - 5
         entity['shield']['position'][1] = entity['position'][1]
         ecran.blit(imgShield, (entity['shield']['position']))
+
+    # Désactive l'épé si expirée et affiche
+    if entity['gun']['end'] < time:
+        inactive(entity['gun'])
 
     if is_active(entity['gun']):
         imgGunRotated = pygame.transform.rotate(imgGun, entity['gun']['direction'])
@@ -497,8 +502,6 @@ def attack(entity, target, time, addMort=True):
     '''
     global nb_morts
 
-    delait = 800 #ms
-
     if not is_visible(target) or not is_active(target) \
             or is_active(target['shield']) or is_active(entity['shield']):
         return False
@@ -514,7 +517,7 @@ def attack(entity, target, time, addMort=True):
         print('!!! Attaque !!! ')
 
         active(entity['gun'])
-        entity['gun']['end'] = time + delait
+        entity['gun']['end'] = time + ATTACK_DURATION
 
         # Calcule la direction et la position de l'image
         direction = math.degrees(math.asin(-delta_y / dist))
@@ -536,7 +539,7 @@ def attack(entity, target, time, addMort=True):
                 nb_morts += 1
                 pprint({'Nombre de morts': nb_morts})
 
-            inactive(target, time + delait)
+            inactive(target, time + ATTACK_DURATION)
 
 
 def auto_attack(ennemies, gamer, time):
@@ -643,13 +646,13 @@ def traite_entrees(time):
                 inactive(gamers[0]['shield'])  # gamer['shield']['active'] = False
 
 
-def draw_all():
+def draw_all(time):
     global gamers, enemies, decors
 
     # Fusionne les listes dans le bonne ordre
     entities = decors + enemies + gamers
     for entity in entities:
-        draw(entity, fenetre)
+        draw(entity, fenetre, time)
 
 
 def level():
@@ -742,7 +745,7 @@ while not fini:
     traite_entrees(actualTime)
 
     fenetre.fill(GREY)
-    draw_all()
+    draw_all(actualTime)
 
     # Déplacement
     for enemy in enemies:

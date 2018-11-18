@@ -578,22 +578,6 @@ def attack_enemy(gamer, mouseposition, time):
 ##### Fin Attaque #####
 
 ##### Définition Collisions #####
-'''
-def collision(entity, target):
-    if ((entity['position'][0] + entity['size'][0]) >= target['position'][0] and entity['position'][0] <= (
-            target['position'][0] + target['size'][0])):
-        if ((entity['position'][1] + entity['size'][1]) >= target['position'][1] and entity['position'][1] <= (
-                target['position'][1] + target['size'][1])):
-            return 1
-    else:
-        return 0
-
-
-def collisions_deco(entity, second):
-    if (entity['type'] == "gamer"):
-        if (collision(entity, second)):
-'''
-
 
 def colliRectCicle(rleft, rtop, width, height, center_x, center_y, radius):
     '''

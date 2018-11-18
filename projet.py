@@ -25,8 +25,8 @@ SHIELD_SIZE = (100, 120)
 GUN_SIZE = (83, 114)
 DECOR_SIZE = (300, 300)
 
-DIST_ATTACK_MAX = 120 #px
-ATTACK_DURATION = 500 #ms
+DIST_ATTACK_MAX = 120  # px
+ATTACK_DURATION = 500  # ms
 DIST_ENEMY_MIN = 90
 
 GAUGE_SIZE = 100, 30
@@ -43,10 +43,10 @@ GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - 50, 50
 #       quitter
 #   améliorer affichage attaque
 #       meilleur placement
-#   emecher attaque en meme temps que bouclier
 #   gérer les collision avec les décors (Raul)
 #       et les actions qui en découle (Raul)
 #       [https://stackoverflow.com/questions/24727773/detecting-rectangle-collision-with-a-circle]
+#       [https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection]
 
 
 #### Début ENTITE #####
@@ -520,24 +520,21 @@ def attack(entity, target, time, addMort=True):
         entity['gun']['end'] = time + ATTACK_DURATION
 
         # Calcule la direction et la position de l'image
-        direction = math.degrees(math.asin(-delta_y / dist))
-        print(direction)
+        direction = math.degrees(math.acos(delta_y / dist))
 
-        # Regle le problème de reduction de domaine (et de signe) dans l'arcsin
-        if delta_x < 0:
-            direction += 180
+        # Redirige correctement l'angle
+        if delta_y < 0:
+            direction -= 180
 
         entity['gun']['direction'] = direction
         set_position(entity['gun'], get_position(target))
 
         set_life(target, -get_power(entity), True)
-        pprint({'Vie': get_life(target)})
 
         # Mort
         if get_life(target) <= 0:
             if addMort:
                 nb_morts += 1
-                pprint({'Nombre de morts': nb_morts})
 
             inactive(target, time + ATTACK_DURATION)
 
@@ -558,7 +555,6 @@ def auto_attack(ennemies, gamer, time):
 
         if dist < DIST_ATTACK_MAX and is_active(ennemies[i]) and is_visible(ennemies[i]):
             attack(ennemies[i], gamer, time)
-            print(get_life(gamer))
 
 
 def attack_enemy(gamer, mouseposition, time):
@@ -570,7 +566,6 @@ def attack_enemy(gamer, mouseposition, time):
     '''
 
     targetPoint = mouseposition
-    pprint(targetPoint)
 
     # Trouver l'ennemi dans cette direction
     for i in range(len(enemies)):
@@ -582,7 +577,8 @@ def attack_enemy(gamer, mouseposition, time):
 
 ##### Fin Attaque #####
 
-##### Collisions #####
+##### Définition Collisions #####
+'''
 def collision(entity, target):
     if ((entity['position'][0] + entity['size'][0]) >= target['position'][0] and entity['position'][0] <= (
             target['position'][0] + target['size'][0])):
@@ -596,10 +592,41 @@ def collision(entity, target):
 def collisions_deco(entity, second):
     if (entity['type'] == "gamer"):
         if (collision(entity, second)):
-            print('in babe')
+'''
 
 
-##### Fin collisions #####
+def colliRectCicle(rleft, rtop, width, height, center_x, center_y, radius):
+    '''
+    Détecte une collision entre un rectangle et un cercle
+    '''
+
+    # complete boundbox of the rectangle
+    rright, rbottom = rleft + width / 2, rtop + height / 2
+
+    # bounding box of the circle
+    cleft, ctop = center_x - radius, center_y - radius
+    cright, cbottom = center_x + radius, center_y + radius
+
+    # trivial reject if bounding boxes do not intersect
+    if rright < cleft or rleft > cright or rbottom < ctop or rtop > cbottom:
+        return False  # no collision possible
+
+    # check whether any point of rectangle is inside circle's radius
+    for x in (rleft, rleft + width):
+        for y in (rtop, rtop + height):
+            # compare distance between circle's center point and each point of
+            # the rectangle with the circle's radius
+            if math.hypot(x - center_x, y - center_y) <= radius:
+                return True  # collision detected
+
+    # check if center of circle is inside rectangle
+    if rleft <= center_x <= rright and rtop <= center_y <= rbottom:
+        return True  # overlaid
+
+    return False  # no collision detected
+
+
+##### Fin Collisions #####
 
 ##### Définition JAUGE #####
 
@@ -706,7 +733,7 @@ imgShield = pygame.transform.scale(imgShield, SHIELD_SIZE)
 
 imgGun = pygame.image.load(path + 'Attaque.png').convert_alpha(fenetre)
 imgGun = pygame.transform.scale(imgGun, GUN_SIZE)
-imgGun = pygame.transform.rotate(imgGun, -90)
+# imgGun = pygame.transform.rotate(imgGun, -90)
 
 # Personage
 gamer = new_entity('gamer')

@@ -43,10 +43,6 @@ GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - 50, 50
 #       quitter
 #   améliorer affichage attaque
 #       meilleur placement
-#   gérer les collision avec les décors (Raul)
-#       et les actions qui en découle (Raul)
-#       [https://stackoverflow.com/questions/24727773/detecting-rectangle-collision-with-a-circle]
-#       [https://stackoverflow.com/questions/401847/circle-rectangle-collision-detection-intersection]
 
 
 #### Début ENTITE #####
@@ -235,7 +231,7 @@ def set_life(entity, life, relatif):
     '''
     Définit la force de l'attque
 
-    Si relatif enleve life à la vie actuel
+    Si relatif ajoute life à la vie actuel (en vérifiant les bornes [0, 100])
     :param entity:
     :param life: int
     :param relatif: bool
@@ -243,6 +239,10 @@ def set_life(entity, life, relatif):
     '''
     if relatif:
         entity['life'] += life
+        if entity['life'] > 100:
+            entity['life'] = 100
+        elif entity['life'] < 0:
+            entity['life'] = 0
     else:
         entity['life'] = life
 
@@ -598,6 +598,8 @@ def collisions_deco(entity, second):
 def colliRectCicle(rleft, rtop, width, height, center_x, center_y, radius):
     '''
     Détecte une collision entre un rectangle et un cercle
+
+    inspiré de [https://stackoverflow.com/questions/24727773/detecting-rectangle-collision-with-a-circle]
     '''
 
     # complete boundbox of the rectangle
@@ -646,12 +648,10 @@ def collision_decors(gamer):
 
         if colliRectCicle(rleft, rtop, width, height, center_x, center_y, radius):
             type = decor['type']
-            if type == 'decor1':
-                print('CollDecor1')
-            elif type == 'decor2':
-                print('CollDecor2')
+            if type == 'decor2':
+                set_life(gamer, -0.05, True)
             elif type == 'decor3':
-                print('CollDecor3')
+                set_life(gamer, 0.05, True)
 
 
 ##### Fin Collisions #####

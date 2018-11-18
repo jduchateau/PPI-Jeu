@@ -54,7 +54,7 @@ def new_entity(type):
     '''
     Créer une entité
 
-    :param type: "gamer", "enemy", "decor1", "decor2", "decor3", "shield", "gun"
+    :param type: "gamer", "enemy", "decor1", "decor2", "decor3"
     :return:
     '''
     size = [0, 0]
@@ -72,7 +72,7 @@ def new_entity(type):
         size = FIGURE_SIZE
         life = 10
         power = 0.5
-    elif type == "decor1":
+    elif type in ("decor1", "decor2", "decor3"):
         size = DECOR_SIZE
 
     if type == "enemy":
@@ -520,11 +520,11 @@ def attack(entity, target, time, addMort=True):
         entity['gun']['end'] = time + ATTACK_DURATION
 
         # Calcule la direction et la position de l'image
-        direction = math.degrees(math.acos(delta_y / dist))
+        direction = math.degrees(math.acos(abs(delta_y / dist)))
 
         # Redirige correctement l'angle
         if delta_y < 0:
-            direction -= 180
+            direction *= -1
 
         entity['gun']['direction'] = direction
         set_position(entity['gun'], get_position(target))
@@ -624,6 +624,34 @@ def colliRectCicle(rleft, rtop, width, height, center_x, center_y, radius):
         return True  # overlaid
 
     return False  # no collision detected
+
+
+def collision_decors(gamer):
+    '''
+    Détecte une collision entre le gamer
+    et les décors et applique les actions requises
+    '''
+    global decors
+
+    rleft = get_position(gamer)[0]
+    rtop = get_position(gamer)[1]
+    width = get_size(gamer)[0]
+    height = get_size(gamer)[1]
+
+    for decor in decors:
+
+        radius = get_size(decor)[0] / 2
+        center_x = get_position(decor)[0] + radius
+        center_y = get_position(decor)[1] + radius
+
+        if colliRectCicle(rleft, rtop, width, height, center_x, center_y, radius):
+            type = decor['type']
+            if type == 'decor1':
+                print('CollDecor1')
+            elif type == 'decor2':
+                print('CollDecor2')
+            elif type == 'decor3':
+                print('CollDecor3')
 
 
 ##### Fin Collisions #####
@@ -772,7 +800,6 @@ while not fini:
     traite_entrees(actualTime)
 
     fenetre.fill(GREY)
-    draw_all(actualTime)
 
     # Déplacement
     for enemy in enemies:
@@ -782,19 +809,18 @@ while not fini:
 
     auto_attack(enemies, gamers[0], actualTime)
 
-    show_gauge(gaugeLife, fenetre)
+    collision_decors(gamers[0])
 
     generate(enemiesGenerator, levelGamer, actualTime)
     generate(decor1Generator, levelGamer, actualTime)
     generate(decor2Generator, levelGamer, actualTime)
     generate(decor3Generator, levelGamer, actualTime)
 
-    for decor in decors:
-        if (decor['type'] == "decor2"):
-            collisions_deco(gamers[0], decor)
+    show_gauge(gaugeLife, fenetre)
+    draw_all(actualTime)
 
     pygame.display.flip()
-    temps.tick(50)
+    temps.tick(100)
 
 pygame.display.quit()
 pygame.quit()

@@ -25,7 +25,7 @@ SHIELD_SIZE = (100, 120)
 GUN_SIZE = (83, 114)
 DECOR_SIZE = (300, 300)
 
-DIST_ATTACK_MAX = 120  # px
+DIST_ATTACK_MAX = 150  # px
 ATTACK_DURATION = 500  # ms
 DIST_ENEMY_MIN = 90
 
@@ -549,7 +549,7 @@ def auto_attack(ennemies, gamer, time):
     for i in range(len(ennemies)):
         delta_x = get_position(gamer)[0] - get_position(ennemies[i])[0]
         delta_y = get_position(gamer)[1] - get_position(ennemies[i])[1]
-        dist = math.sqrt(delta_x ** 2 + delta_y ** 2)
+        dist = math.hypot(delta_x, delta_y)
 
         if dist < DIST_ATTACK_MAX and is_active(ennemies[i]) and is_visible(ennemies[i]):
             attack(ennemies[i], gamer, time)
@@ -674,7 +674,6 @@ def traite_entrees(time):
                 mx, my = pygame.mouse.get_pos()
             elif evenement.button == MOUSE_RIGHT:
                 attack_enemy(gamers[0], pygame.mouse.get_pos(), time)
-                mx, my = pygame.mouse.get_pos()
 
         elif evenement.type == pygame.KEYDOWN:
             if evenement.key == pygame.K_SPACE:

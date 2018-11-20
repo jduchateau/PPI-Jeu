@@ -227,7 +227,7 @@ def get_life(entity):
     return entity['life']
 
 
-def set_life(entity, life, relatif):
+def set_life(entity, life, relatif=False):
     '''
     Définit la force de l'attque
 
@@ -511,10 +511,8 @@ def attack(entity, target, time, addMort=True):
     delta_y = target['position'][1] - entity['position'][1]
     dist = math.sqrt(delta_x ** 2 + delta_y ** 2)
 
-    print('Attaque ? ' + str(dist))
 
     if dist < DIST_ATTACK_MAX:
-        print('!!! Attaque !!! ')
 
         active(entity['gun'])
         entity['gun']['end'] = time + ATTACK_DURATION
@@ -664,11 +662,12 @@ def show_gauge(gauge, screen):
 ##### Fin JAUGE #####
 
 def traite_entrees(time):
-    global fini, mx, my, gamers
+    global fini, mx, my, gamers, partie_enCours
     for evenement in pygame.event.get():
 
         if evenement.type == pygame.QUIT:
             fini = True
+            partie_enCours = False
 
         elif evenement.type == pygame.MOUSEBUTTONDOWN:
             if evenement.button == MOUSE_LEFT:
@@ -685,6 +684,32 @@ def traite_entrees(time):
                 inactive(gamers[0]['shield'])  # gamer['shield']['active'] = False
 
 
+def traite_entrees_menu():
+    global fini, partie_enCours, immortelle, gamers
+    for evenement in pygame.event.get():
+
+        if evenement.type == pygame.QUIT:
+            fini = True
+            partie_enCours = False
+        elif evenement.type == pygame.KEYDOWN:
+            if evenement.key == pygame.K_SPACE:
+                partie_enCours = True
+                fini = False
+
+            elif evenement.key == pygame.K_r:
+                partie_enCours = False
+                fini = False
+
+            elif evenement.key == pygame.K_i:
+                partie_enCours = True
+                fini = False
+                immortelle = True
+
+            elif evenement.key == pygame.K_q:
+                fini = True
+                partie_enCours = False
+
+
 def draw_all(time):
     global gamers, enemies, decors
 
@@ -692,6 +717,58 @@ def draw_all(time):
     entities = decors + enemies + gamers
     for entity in entities:
         draw(entity, fenetre, time)
+
+
+def draw_intro_menu(fenetre):
+    global font_title, font_small
+
+    title_text = "The Dream Survivor"
+    explanation_text = "Utiliser la souris et la barre d'espace"
+
+    title = font_title.render(title_text, True, BLACK)
+    title_width, title_height = font_title.size(title_text)
+
+    explanation = font_small.render(explanation_text, True, BLACK)
+    explanation_width, explanation_height = font_small.size(explanation_text)
+
+    fenetre.fill(GREY)
+    fenetre.blit(title, ((WINDOWS_SIZE[0] - title_width) // 2, WINDOWS_SIZE[1] // 3 - title_height // 2))
+    fenetre.blit(explanation,
+                 (WINDOWS_SIZE[0] // 2 - explanation_width // 2, 2 * WINDOWS_SIZE[1] // 3 - title_height // 2))
+
+
+def draw_final_menu(fenetre):
+    global font_title, font_small
+
+    title_text = "Mort"
+    exp1_text = "[R] pour recommencer une partie"
+    exp2_text = "[I] pour devenir immortelle"
+    exp3_text = "[Q] pour partir"
+
+    marge = 10
+
+    title = font_title.render(title_text, True, BLACK)
+    title_width, title_height = font_title.size(title_text)
+    title_position = ((WINDOWS_SIZE[0] - title_width) // 2, WINDOWS_SIZE[1] // 3)
+
+    exp1 = font_small.render(exp1_text, True, BLACK)
+    exp1_width, exp1_height = font_small.size(exp1_text)
+    exp1_position = (((WINDOWS_SIZE[0] - exp1_width) // 2), WINDOWS_SIZE[1] // 3 + title_height + marge)
+
+    exp2 = font_small.render(exp2_text, True, BLACK)
+    exp2_width, exp2_height = font_small.size(exp2_text)
+    exp2_position = (
+    ((WINDOWS_SIZE[0] - exp2_width) // 2), WINDOWS_SIZE[1] // 3 + title_height + exp1_height + 2 * marge)
+
+    exp3 = font_small.render(exp3_text, True, BLACK)
+    exp3_width, exp3_height = font_small.size(exp3_text)
+    exp3_position = (
+    (WINDOWS_SIZE[0] - exp3_width) // 2, WINDOWS_SIZE[1] // 3 + title_height + exp1_height + exp2_height + 3 * marge)
+
+    fenetre.blit(title, title_position)
+    fenetre.blit(exp1, exp1_position)
+    fenetre.blit(exp2, exp2_position)
+    fenetre.blit(exp3, exp3_position)
 
 
 def level():
@@ -710,18 +787,27 @@ def lifeGamer():
     return get_life(gamers[0])
 
 
+def createGamer():
+    global gamers
+    gamer = new_entity('gamer')
+
+    set_position(gamer, WINDOWS_SIZE[0] / 2 - get_size(gamer)[0] / 2, WINDOWS_SIZE[1] / 2 - get_size(gamer)[1] / 2)
+    set_image(gamer, imgE1Joueur)
+    visible(gamer)
+    shield_position = (gamer['position'][0], gamer['position'][1])
+    gamers.append(gamer)
+
+
 ##### OBJECTS INIT #####
 
 
 pygame.init()
 
 fenetre = pygame.display.set_mode(WINDOWS_SIZE)
-pygame.display.set_caption('Battail dans le vide')
+pygame.display.set_caption("Batail des rêves")
 
-# Liste des entitées selon le type
-gamers = []
-enemies = []
-decors = []
+font_title = pygame.font.SysFont('Manjari', 36, True)
+font_small = pygame.font.SysFont('Manjari', 24, True)
 
 # Images
 path = 'img/'
@@ -745,17 +831,7 @@ imgShield = pygame.transform.scale(imgShield, SHIELD_SIZE)
 
 imgGun = pygame.image.load(path + 'Attaque.png').convert_alpha(fenetre)
 imgGun = pygame.transform.scale(imgGun, GUN_SIZE)
-# imgGun = pygame.transform.rotate(imgGun, -90)
-
-# Personage
-gamer = new_entity('gamer')
-
-set_position(gamer, WINDOWS_SIZE[0] / 2 - get_size(gamer)[0] / 2, WINDOWS_SIZE[1] / 2 - get_size(gamer)[1] / 2)
-set_image(gamer, imgE1Joueur)
-visible(gamer)
-gamers.append(gamer)
-
-del gamer
+imgGun = pygame.transform.rotate(imgGun, -90)
 
 # Generateurs
 enemiesGenerator = new_generator('enemy', 5 * 1000, 'edge', imgE2Ennemis)
@@ -770,39 +846,74 @@ gaugeLife = new_gauge(pygame.Rect(GAUGE_POSITION[0], GAUGE_POSITION[1], GAUGE_SI
 
 ##### VARIABLES #####
 temps = pygame.time.Clock()
-mx = WINDOWS_SIZE[0] / 2
-my = WINDOWS_SIZE[1] / 2
 fini = False
-shield_position = (gamers[0]['position'][0], gamers[0]['position'][1])
-nb_morts = 0
+partie_enCours = False
+mort = False
+immortelle = False
+
 
 ##### THE MAIN WHILE #####
 while not fini:
-    actualTime = pygame.time.get_ticks()
-    levelGamer = level()
+    partie_enCours = False
 
-    traite_entrees(actualTime)
+    mx = WINDOWS_SIZE[0] / 2
+    my = WINDOWS_SIZE[1] / 2
 
-    fenetre.fill(GREY)
+    nb_morts = 0
+    mort = False
 
-    # Déplacement
-    for enemy in enemies:
-        move_ennemy(enemy, actualTime)
+    # Liste des entitées selon le type
+    gamers = []
+    enemies = []
+    decors = []
+    createGamer()
 
-    move_gamer(gamers[0])
+    draw_intro_menu(fenetre)
+    traite_entrees_menu()
 
-    auto_attack(enemies, gamers[0], actualTime)
+    while partie_enCours:
 
-    collision_decors(gamers[0])
+        actualTime = pygame.time.get_ticks()
+        levelGamer = level()
 
-    generate(enemiesGenerator, levelGamer, actualTime)
-    generate(decor1Generator, levelGamer, actualTime)
-    generate(decor2Generator, levelGamer, actualTime)
-    generate(decor3Generator, levelGamer, actualTime)
+        if not mort or immortelle:
+            traite_entrees(actualTime)
 
-    show_gauge(gaugeLife, fenetre)
-    draw_all(actualTime)
+        fenetre.fill(GREY)
 
+        # Déplacement
+        for enemy in enemies:
+            move_ennemy(enemy, actualTime)
+
+        move_gamer(gamers[0])
+
+        auto_attack(enemies, gamers[0], actualTime)
+
+        collision_decors(gamers[0])
+
+        generate(enemiesGenerator, levelGamer, actualTime)
+        generate(decor1Generator, levelGamer, actualTime)
+        generate(decor2Generator, levelGamer, actualTime)
+        generate(decor3Generator, levelGamer, actualTime)
+
+        draw_all(actualTime)
+        show_gauge(gaugeLife, fenetre)
+
+        if get_life(gamers[0]) <= 0 and not immortelle:
+            mort = True
+
+        if immortelle:
+            active(gamers[0])
+
+        if mort and not immortelle:
+            draw_final_menu(fenetre)
+            traite_entrees_menu()
+
+        print(fini, partie_enCours, mort, immortelle)
+        pygame.display.flip()
+        temps.tick(100)
+
+    print(fini, partie_enCours, mort, immortelle)
     pygame.display.flip()
     temps.tick(100)
 

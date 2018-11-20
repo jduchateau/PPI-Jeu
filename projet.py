@@ -366,21 +366,19 @@ def move_ennemy(entity, actualTime):
 
     # Calule la distance entre l'ennemis et le joueur
     gamer = gamers[0]
-    dist = tuple(x - y for x, y in zip(get_position(gamer), get_position(entity)))  # différence entre deux tuples
+    delta_x = get_position(gamer)[0] - get_position(entity)[0]
+    delta_y = get_position(gamer)[1] - get_position(entity)[1]
+    dist = math.hypot(delta_x, delta_y)
     margin = DIST_ENEMY_MIN
 
     # Determine la vitesse
-    # Verifie champ de vision
-    if (dist[0] > entity['R']):
+    # Verifie si le joueur est dans le champ de vision
+    if (dist > entity['R']):
         inVision = False
-    elif (dist[1] > entity['R']):
-        inVision = False
-    elif (dist[0] <= entity['R']):
-        inVision = True
-    elif (dist[1] <= entity['R']):
+    else:
         inVision = True
 
-    if (inVision == True):  # In the vision field
+    if inVision:  # In the vision field
         vitessex = speed(entity, (gamer['position'][0] - entity['size'][0]), 0) / 2.0
         vitessey = speed(entity, gamer['position'][1], 1) / 2.0
         if (entity['position'][0] < (gamer['position'][0] - margin)):
@@ -400,7 +398,8 @@ def move_ennemy(entity, actualTime):
                 vitessey *= -1
         else:
             vitessey = 0
-    elif (inVision == False):  # Not in the vision field
+
+    else:  # Not in the vision field
         if (deplace_dist <= 0):
             deplace_dist = 50
             if (entity['position'][0] < 0):
@@ -497,10 +496,10 @@ def attack(entity, target, time, addMort=True):
     :param entity: entité à l'origine de l'attaque
     :param target: cible de l'attaque
     :param time: int
-    :param addMort: incrémente nb_mort si vrai
+    :param addMort: incrémente nb_mort ou le joueur meurt
     :return:
     '''
-    global nb_morts
+    global nb_morts, mort
 
     if not is_visible(target) or not is_active(target) \
             or is_active(target['shield']) or is_active(entity['shield']):
@@ -511,20 +510,20 @@ def attack(entity, target, time, addMort=True):
     delta_y = target['position'][1] - entity['position'][1]
     dist = math.sqrt(delta_x ** 2 + delta_y ** 2)
 
-
     if dist < DIST_ATTACK_MAX:
 
         active(entity['gun'])
         entity['gun']['end'] = time + ATTACK_DURATION
 
         # Calcule la direction et la position de l'image
-        direction = math.degrees(math.acos(abs(delta_y / dist)))
+        direction = 0
+        if dist != 0:
+            if delta_y <= 0:
+                direction = math.acos(delta_x / dist)
+            else:
+                direction = -math.acos(delta_x / dist)
 
-        # Redirige correctement l'angle
-        if delta_y < 0:
-            direction *= -1
-
-        entity['gun']['direction'] = direction
+        entity['gun']['direction'] = math.degrees(direction)
         set_position(entity['gun'], get_position(target))
 
         set_life(target, -get_power(entity), True)
@@ -533,6 +532,8 @@ def attack(entity, target, time, addMort=True):
         if get_life(target) <= 0:
             if addMort:
                 nb_morts += 1
+            else:
+                mort = True
 
             inactive(target, time + ATTACK_DURATION)
 
@@ -662,7 +663,7 @@ def show_gauge(gauge, screen):
 ##### Fin JAUGE #####
 
 def traite_entrees(time):
-    global fini, mx, my, gamers, partie_enCours
+    global fini, mx, my, gamers, partie_enCours, mort
     for evenement in pygame.event.get():
 
         if evenement.type == pygame.QUIT:
@@ -677,10 +678,12 @@ def traite_entrees(time):
 
         elif evenement.type == pygame.KEYDOWN:
             if evenement.key == pygame.K_SPACE:
-                active(gamers[0]['shield'])  # gamer['shield']['active'] = True
+                active(gamers[0]['shield'])
+            elif evenement.key == pygame.K_q:
+                mort = True
         elif evenement.type == pygame.KEYUP:
             if evenement.key == pygame.K_SPACE:
-                inactive(gamers[0]['shield'])  # gamer['shield']['active'] = False
+                inactive(gamers[0]['shield'])
 
 
 def traite_entrees_menu():
@@ -757,12 +760,13 @@ def draw_final_menu(fenetre):
     exp2 = font_small.render(exp2_text, True, BLACK)
     exp2_width, exp2_height = font_small.size(exp2_text)
     exp2_position = (
-    ((WINDOWS_SIZE[0] - exp2_width) // 2), WINDOWS_SIZE[1] // 3 + title_height + exp1_height + 2 * marge)
+        ((WINDOWS_SIZE[0] - exp2_width) // 2), WINDOWS_SIZE[1] // 3 + title_height + exp1_height + 2 * marge)
 
     exp3 = font_small.render(exp3_text, True, BLACK)
     exp3_width, exp3_height = font_small.size(exp3_text)
     exp3_position = (
-    (WINDOWS_SIZE[0] - exp3_width) // 2, WINDOWS_SIZE[1] // 3 + title_height + exp1_height + exp2_height + 3 * marge)
+        (WINDOWS_SIZE[0] - exp3_width) // 2,
+        WINDOWS_SIZE[1] // 3 + title_height + exp1_height + exp2_height + 3 * marge)
 
     fenetre.blit(title, title_position)
     fenetre.blit(exp1, exp1_position)
@@ -850,7 +854,6 @@ partie_enCours = False
 mort = False
 immortelle = False
 
-
 ##### THE MAIN WHILE #####
 while not fini:
     partie_enCours = False
@@ -908,11 +911,9 @@ while not fini:
             draw_final_menu(fenetre)
             traite_entrees_menu()
 
-        print(fini, partie_enCours, mort, immortelle)
         pygame.display.flip()
         temps.tick(100)
 
-    print(fini, partie_enCours, mort, immortelle)
     pygame.display.flip()
     temps.tick(100)
 

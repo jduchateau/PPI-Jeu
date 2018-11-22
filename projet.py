@@ -42,7 +42,6 @@ GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - 50, 50
 #       quitter
 #   améliorer affichage attaque
 #       meilleur placement
-#   afficher le level et le nb_morts
 #   améliorer niveau
 #       génération
 #       vie des ennemis
@@ -492,7 +491,7 @@ def generate(generator, level, time):
 ##### Fin GÉNÉRATEUR ######
 
 ##### Début Attaque #####
-def attack(entity, target, time, addMort=True):
+def attack(entity, target, time, addMort):
     '''
     Entity attaque target
 
@@ -556,7 +555,7 @@ def auto_attack(ennemies, gamer, time):
         dist = math.hypot(delta_x, delta_y)
 
         if dist < DIST_ATTACK_MAX and is_active(ennemies[i]) and is_visible(ennemies[i]):
-            attack(ennemies[i], gamer, time)
+            attack(ennemies[i], gamer, time, False)
 
 
 def attack_enemy(gamer, mouseposition, time):
@@ -574,7 +573,7 @@ def attack_enemy(gamer, mouseposition, time):
         if abs(targetPoint[0] - get_position(enemies[i])[0]) < DIST_ATTACK_MAX \
                 and abs(targetPoint[1] - get_position(enemies[i])[1]) < DIST_ATTACK_MAX \
                 and is_visible(enemies[i]):
-            attack(gamer, enemies[i], time)
+            attack(gamer, enemies[i], time, True)
 
 
 ##### Fin Attaque #####
@@ -777,6 +776,18 @@ def draw_final_menu(fenetre):
     fenetre.blit(exp3, exp3_position)
 
 
+def draw_level(fenetre):
+    global font_small, nb_morts
+
+    text = str(level()) + ' | ' + str(nb_morts)
+
+    textRend = font_small.render(text, False, BLACK)
+    text_width, text_height = font_small.size(text)
+    text_position = GAUGE_POSITION[0] + GAUGE_SIZE[0] - text_width, GAUGE_POSITION[1] + GAUGE_SIZE[1] + 10
+
+    fenetre.blit(textRend, text_position)
+
+
 def level():
     '''
     Calcule le niveau du joueur
@@ -785,7 +796,7 @@ def level():
     '''
     global nb_morts
 
-    return nb_morts // 5
+    return nb_morts // 3
 
 
 def lifeGamer():
@@ -903,6 +914,7 @@ while not fini:
 
         draw_all(actualTime)
         show_gauge(gaugeLife, fenetre)
+        draw_level(fenetre)
 
         if get_life(gamers[0]) <= 0 and not immortelle:
             mort = True

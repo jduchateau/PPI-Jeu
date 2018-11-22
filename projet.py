@@ -36,13 +36,16 @@ GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - 50, 50
 ##### FONCTIONS #####
 
 # TODO
-#   menu d'accueil et d'explication
 #   après la mort du joueur afficher un message:
 #       recomencer une partie
 #       continuer à jouer (mode immortelle)
 #       quitter
 #   améliorer affichage attaque
 #       meilleur placement
+#   afficher le level et le nb_morts
+#   améliorer niveau
+#       génération
+#       vie des ennemis
 
 
 #### Début ENTITE #####

@@ -1,8 +1,7 @@
-# PPI-Jeu
+# The Dream Survivor
 Projet de jeu pour le cours INFO2056 de ULiège
 
-## Attaque dans le Vide
-(Faut trouver un meilleur titre)
+![Visuel du jeu](img/VisuelBatailDeReve.gif)
 
 ### Fonctionnement
 

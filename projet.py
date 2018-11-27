@@ -484,7 +484,7 @@ def generate(generator, level, time):
         visible(entity)
 
         if generator['type'] == 'enemy':
-            set_life(entity, level//5, True)
+            set_life(entity, level*1/5, True)
             print(get_life(entity))
             enemies.append(entity)
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:

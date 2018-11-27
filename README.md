@@ -3,16 +3,27 @@ Projet de jeu pour le cours INFO2056 de ULiège
 
 ![Visuel du jeu](img/visuelBatailDeReve.gif)
 
+Vous êtes un robot perdu dans vos rêves, des ennemis tombe sur vous et veullent votre mort...
+
+Essayer de survivre le plus longtemps car vos ennemis sont de plus en plus puissant...
+
+### Comment lancer le jeu ?
+1. Installer *Python 3* et *pygame*
+2. Se placer dans le bon répertoir
+3. Lancer le jeu ´python3 projet.py´
+
 ### Comment jouer ?
 
 #### Touches
-*Clic gauche* Pour se déplacer
-*Clic droit* Attaquer
-*Espace* Bouclier
+**Clic gauche** Pour se déplacer
+
+**Clic droit** Attaquer
+
+**Espace** Bouclier
 
 #### Score
 En haut à droit vous avez une gauge de vie.
-En dessous, votre **level** et le **nombre de mort**
+En dessous, votre *level* et le *nombre de mort*
 
 #### Décors
 Vous trouverez comment fonctionne les décors tout seul.

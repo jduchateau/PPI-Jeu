@@ -276,7 +276,11 @@ def draw(entity, ecran, time):
         inactive(entity['gun'])
 
     if is_active(entity['gun']):
-        imgGunRotated = pygame.transform.rotate(imgGun, entity['gun']['direction'])
+        if entity['type']=='gamer':
+            imgGunRotated = pygame.transform.rotate(imgGun, entity['gun']['direction'])
+        else:
+            imgGunRotated = pygame.transform.rotate(imgGunEnnemy, entity['gun']['direction'])
+
         ecran.blit(imgGunRotated, entity['gun']['position'])
 
 
@@ -852,6 +856,10 @@ imgShield = pygame.transform.scale(imgShield, SHIELD_SIZE)
 imgGun = pygame.image.load(path + 'Attaque.png').convert_alpha(fenetre)
 imgGun = pygame.transform.scale(imgGun, GUN_SIZE)
 imgGun = pygame.transform.rotate(imgGun, -90)
+
+imgGunEnnemy = pygame.image.load(path + 'Attaque_Ennemy.png').convert_alpha(fenetre)
+imgGunEnnemy = pygame.transform.scale(imgGunEnnemy, GUN_SIZE)
+imgGunEnnemy = pygame.transform.rotate(imgGunEnnemy, -90)
 
 # Generateurs
 enemiesGenerator = new_generator('enemy', 5 * 1000, 'edge', imgE2Ennemis)

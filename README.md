@@ -10,7 +10,7 @@ Essayer de survivre le plus longtemps car vos ennemis sont de plus en plus puiss
 ### Comment lancer le jeu ?
 1. Installer *Python 3* et *pygame*
 2. Se placer dans le bon répertoir
-3. Lancer le jeu ´python3 projet.py´
+3. Lancer le jeu <code>python3 projet.py</code>
 
 ### Comment jouer ?
 

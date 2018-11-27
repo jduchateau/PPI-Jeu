@@ -1,4 +1,4 @@
-from pprint import pprint
+﻿from pprint import pprint
 
 import pygame
 import math
@@ -904,8 +904,8 @@ while not fini:
         move_gamer(gamers[0])
 
         auto_attack(enemies, gamers[0], actualTime)
-
-        collision_decors(gamers[0])
+        if is_active(gamers[0]) :
+            collision_decors(gamers[0])
 
         generate(enemiesGenerator, levelGamer, actualTime)
         generate(decor1Generator, levelGamer, actualTime)

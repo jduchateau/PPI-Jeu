@@ -1,7 +1,7 @@
 # The Dream Survivor
 Projet de jeu pour le cours INFO2056 de ULiège
 
-![Visuel du jeu](img/VisuelBatailDeReve.gif)
+![Visuel du jeu](img/visuelBatailDeReve.gif)
 
 ### Fonctionnement
 

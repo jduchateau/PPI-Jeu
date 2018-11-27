@@ -461,7 +461,7 @@ def generate(generator, level, time):
 
     if generator['new_time'] < time:
         # Nouveau temps
-        new_time = time + generator["frequency"] - level / 1000
+        new_time = time + generator["frequency"] 
         generator['new_time'] = new_time
 
         # Choisi l'emplacelent
@@ -480,12 +480,15 @@ def generate(generator, level, time):
         visible(entity)
 
         if generator['type'] == 'enemy':
+            set_life(entity, level//5, True)
+            print(get_life(entity))
             enemies.append(entity)
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:
             decors.append(entity)
             # Supprime ancien décor en surplut
             if len(decors) > 5:
                 del decors[0]
+
 
 
 ##### Fin GÉNÉRATEUR ######

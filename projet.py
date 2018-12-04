@@ -58,6 +58,7 @@ def new_entity(type):
     size = [0, 0]
     life = 0
     power = 10
+    images = {}
     size_shield = SHIELD_SIZE
     size_gun = GUN_SIZE
 
@@ -66,12 +67,21 @@ def new_entity(type):
         size = FIGURE_SIZE
         life = 100
         power = 10
+        images = {'debout': imgE1Joueur}
     elif type == "enemy":
         size = FIGURE_SIZE
         life = 10
         power = 0.5
+        images = {'debout': imgE2Ennemis}
     elif type in ("decor1", "decor2", "decor3"):
         size = DECOR_SIZE
+
+        if type == "decor1":
+            images = {'droit': imgDecor1}
+        elif type == "decor2":
+            images = {'droit': imgDecor2}
+        elif type == "decor3":
+            images = {'droit': imgDecor3}
 
     if type == "enemy":
         extra = {'inVision': False,
@@ -104,7 +114,9 @@ def new_entity(type):
             'direction': 0
         },
         'enemy': extra,
-
+        'animations': [],
+        'images': images,
+        'actualAnimation': {'name', 'image', 'nextTime'}
     }
 
 
@@ -276,7 +288,7 @@ def draw(entity, ecran, time):
         inactive(entity['gun'])
 
     if is_active(entity['gun']):
-        if entity['type']=='gamer':
+        if entity['type'] == 'gamer':
             imgGunRotated = pygame.transform.rotate(imgGun, entity['gun']['direction'])
         else:
             imgGunRotated = pygame.transform.rotate(imgGunEnnemy, entity['gun']['direction'])
@@ -465,7 +477,7 @@ def generate(generator, level, time):
 
     if generator['new_time'] < time:
         # Nouveau temps
-        new_time = time + generator["frequency"] 
+        new_time = time + generator["frequency"]
         generator['new_time'] = new_time
 
         # Choisi l'emplacelent
@@ -484,7 +496,7 @@ def generate(generator, level, time):
         visible(entity)
 
         if generator['type'] == 'enemy':
-            set_life(entity, level*1/5, True)
+            set_life(entity, level * 1 / 5, True)
             print(get_life(entity))
             enemies.append(entity)
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:
@@ -492,7 +504,6 @@ def generate(generator, level, time):
             # Supprime ancien décor en surplut
             if len(decors) > 5:
                 del decors[0]
-
 
 
 ##### Fin GÉNÉRATEUR ######
@@ -914,7 +925,7 @@ while not fini:
         move_gamer(gamers[0])
 
         auto_attack(enemies, gamers[0], actualTime)
-        if is_active(gamers[0]) :
+        if is_active(gamers[0]):
             collision_decors(gamers[0])
 
         generate(enemiesGenerator, levelGamer, actualTime)

@@ -1,4 +1,4 @@
-from pprint import pprint
+﻿from pprint import pprint
 
 import pygame
 import math
@@ -205,14 +205,6 @@ def get_size(entity):
     return tuple(entity['size'])
 
 
-def set_image(entity, image):
-    entity['actualImg'] = image
-
-
-def get_image(entity):
-    return entity['actualImg']
-
-
 def set_color(entity, c):
     entity['color'] = c
 
@@ -293,11 +285,11 @@ def start_animation(entity, animation_name, temps, retepe):
     entity['actualAnimation']['time'] = actual_time
     entity['actualAnimation']['repete'] = retepe
 
-def stop_animation(entity, animation_name):
+
+def stop_animation(entity):
     '''
     Arreter une animation
     :param entity: le nom de l'entité
-    :param animation_name: le nom de l'animation
     '''
     entity['actualAnimation']['name'] = ''
     entity['actualAnimation']['step'] = None
@@ -305,12 +297,40 @@ def stop_animation(entity, animation_name):
     entity['actualAnimation']['repete'] = False
 
 
-def get_actual_image(entity):
+def get_actual_image(entity, actualtime):
     '''
     Retourne la surface affichée actuelement
     :param entity: le nom de l'entité
+    :param actualtime: temps actuel en ms
     :return: surface
     '''
+
+    name = entity['actualAnimation']['name']
+    step = entity['actualAnimation']['step']
+    time = entity['actualAnimation']['time']
+    repete = entity['actualAnimation']['repete']
+
+    if name != '' and name in entity['animations']:
+        # [nomImage,duree]
+        nomImage, duree = entity['animations'][name][step]
+
+        nextTime = time + duree
+
+        if actualtime < nextTime:
+            image = entity['images'][nomImage]
+            return image
+        else:
+            if step == len(entity['animations'][name]) - 1:
+                if repete:
+                    step = 0
+                else:
+                    stop_animation(entity)
+            else:
+                step += 1
+
+            nomImage = entity['animations'][name][step][0]
+            return entity['images'][nomImage]
+
 
 def draw(entity, ecran, time):
     '''
@@ -324,10 +344,8 @@ def draw(entity, ecran, time):
     if not is_visible(entity):
         return
 
-    if entity['color'] is tuple:
-        pygame.draw.rect(ecran, entity['color'], (entity['position'], entity['size']))
-    elif get_image(entity):
-        ecran.blit(get_image(entity), get_position(entity, True))
+    surface = get_actual_image(entity, time)
+    ecran.blit(surface, get_position(entity, True))
 
     if is_active(entity['shield']) and entity['type'] == "gamer":
         entity['shield']['position'][0] = entity['position'][0] - 5

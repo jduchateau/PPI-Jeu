@@ -62,13 +62,6 @@ def new_entity(type):
     elif type in ("decor1", "decor2", "decor3"):
         size = DECOR_SIZE
 
-        if type == "decor1":
-            images = {'droit': imgDecor1}
-        elif type == "decor2":
-            images = {'droit': imgDecor2}
-        elif type == "decor3":
-            images = {'droit': imgDecor3}
-
     if type == "enemy":
         extra = {'inVision': False,
                  'deplace_dist': 50,
@@ -83,7 +76,6 @@ def new_entity(type):
         'size': size,
         'speed': [0, 0],
         'color': None,
-        'actualImg': None,
         'life': life,
         'power': power,
         'R': 300,  # Radius of vison
@@ -253,7 +245,7 @@ def create_animation(entity, animation, images=False):
     '''
     entity['animations'].update(animation)
 
-    if not images:
+    if images is dict:
         entity['images'].update(images)
 
 
@@ -337,8 +329,10 @@ def draw(entity, ecran, time):
     if surface != None:
         ecran.blit(surface, get_position(entity, True))
     else:
-        print('draw(): surface :')
+        print('draw():surface')
         pprint(surface)
+        print('draw():entity')
+        pprint(entity)
         exit(5)
 
     if is_active(entity['shield']) and entity['type'] == "gamer":

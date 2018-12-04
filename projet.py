@@ -1,4 +1,4 @@
-﻿from pprint import pprint
+from pprint import pprint
 
 import pygame
 import math
@@ -116,7 +116,7 @@ def new_entity(type):
         'enemy': extra,
         'animations': [],
         'images': images,
-        'actualAnimation': {'name', 'image', 'nextTime'}
+        'actualAnimation': {'name', 'step', 'time', 'repete'}
     }
 
 
@@ -261,7 +261,6 @@ def set_life(entity, life, relatif=False):
         entity['life'] = life
 
 
-
 ##### Fin ENTITEE ######
 
 
@@ -274,6 +273,11 @@ def create_animation(entity, animation, images=False):
     :param animation: nom : [{Nom_Image, Temps}, ...]
     :param images: la posibilité d'ajouter des objets de surface nommée
     '''
+    entity['animations'].append(animation)
+
+    if not images:
+        entity['images'].update(images)
+
 
 def start_animation(entity, animation_name, retepe):
     '''

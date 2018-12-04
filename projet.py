@@ -114,7 +114,7 @@ def new_entity(type):
             'direction': 0
         },
         'enemy': extra,
-        'animations': [],
+        'animations': {},
         'images': images,
         'actualAnimation': {'name', 'step', 'time', 'repete'}
     }
@@ -279,13 +279,19 @@ def create_animation(entity, animation, images=False):
         entity['images'].update(images)
 
 
-def start_animation(entity, animation_name, retepe):
+def start_animation(entity, animation_name, temps, retepe):
     '''
     Commencer une animation
     :param entity: le nom de l'entité
     :param animation_name: le nom de l'animation
+    :param temps : temps actuen en milisecondes
     :param retepe: le nombre de fois que l'animation va etre répétée
     '''
+    actual_time = temps
+    entity['actualAnimation']['name'] = animation_name
+    entity['actualAnimation']['step'] = 0
+    entity['actualAnimation']['time'] = actual_time
+    entity['actualAnimation']['repete'] = retepe
 
 def stop_animation(entity, animation_name):
     '''
@@ -293,6 +299,11 @@ def stop_animation(entity, animation_name):
     :param entity: le nom de l'entité
     :param animation_name: le nom de l'animation
     '''
+    entity['actualAnimation']['name'] = ''
+    entity['actualAnimation']['step'] = None
+    entity['actualAnimation']['time'] = None
+    entity['actualAnimation']['repete'] = False
+
 
 def get_actual_image(entity):
     '''

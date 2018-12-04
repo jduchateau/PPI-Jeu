@@ -565,7 +565,7 @@ def generate(generator, level, time):
 
         entity = new_entity(generator['type'])
         set_position(entity, position)
-        set_image(entity, generator['image'])
+        #TODO
         visible(entity)
 
         if generator['type'] == 'enemy':
@@ -900,7 +900,7 @@ def createGamer():
     gamer = new_entity('gamer')
 
     set_position(gamer, WINDOWS_SIZE[0] / 2 - get_size(gamer)[0] / 2, WINDOWS_SIZE[1] / 2 - get_size(gamer)[1] / 2)
-    set_image(gamer, imgE1Joueur)
+    #TODO
     visible(gamer)
     gamers.append(gamer)
 
@@ -956,36 +956,70 @@ gaugeLife = new_gauge(pygame.Rect(GAUGE_POSITION[0], GAUGE_POSITION[1], GAUGE_SI
 ##### OBJECTS INI FIN #####
 
 ##### ANIMATIONS INIT DEBUT #####
-## gamer :
-j1 = pygame.image.load(path + 'E1_Joueur.png').convert_alpha(fenetre)
-j1 = pygame.transform.scale(j1, FIGURE_SIZE)
+########### gamer :
+### right :
+gamer_right_static = pygame.image.load(path + 'E1_Joueur.png').convert_alpha(fenetre)
+gamer_right_static = pygame.transform.scale(gamer_right_static, FIGURE_SIZE)
 
-j2 = pygame.image.load(path + 'E1_Joueur_Gauche.png').convert_alpha(fenetre)
-j2 = pygame.transform.scale(j2, FIGURE_SIZE)
+gamer_right_left = pygame.image.load(path + 'E1_Joueur_Gauche.png').convert_alpha(fenetre)
+gamer_right_left = pygame.transform.scale(gamer_right_left, FIGURE_SIZE)
 
-j3 = pygame.image.load(path + 'E1_Joueur_Droite.png').convert_alpha(fenetre)
-j3 = pygame.transform.scale(j3, FIGURE_SIZE)
+gamer_right_right = pygame.image.load(path + 'E1_Joueur_Droite.png').convert_alpha(fenetre)
+gamer_right_right = pygame.transform.scale(gamer_right_right, FIGURE_SIZE)
 
-## ennemy :
-e1 = pygame.image.load(path + 'E2_Ennemis.png').convert_alpha(fenetre)
-e1 = pygame.transform.scale(e1, FIGURE_SIZE)
+### left :
+gamer_left_static = pygame.image.load(path + 'E1_Joueur.png').convert_alpha(fenetre)
+gamer_left_static = pygame.transform.scale(gamer_left_static, FIGURE_SIZE)
 
-e2 = pygame.image.load(path + 'E2_Ennemis_Gauche.png').convert_alpha(fenetre)
-e2 = pygame.transform.scale(e2, FIGURE_SIZE)
+gamer_left_left = pygame.image.load(path + 'E1_Joueur_Gauche.png').convert_alpha(fenetre)
+gamer_left_left = pygame.transform.scale(gamer_left_left, FIGURE_SIZE)
 
-e3 = pygame.image.load(path + 'E2_Ennemis_Droite.png').convert_alpha(fenetre)
-e3 = pygame.transform.scale(e3, FIGURE_SIZE)
+gamer_left_right = pygame.image.load(path + 'E1_Joueur_Droite.png').convert_alpha(fenetre)
+gamer_left_right = pygame.transform.scale(gamer_left_right, FIGURE_SIZE)
 
-anim_gamer = [
-                ['e1', 300],
-                ['e2', 300],
-                ['e3', 300]
-                ]
+########### ennemy :
+### right :
+enemy_right_static = pygame.image.load(path + 'E2_Ennemis.png').convert_alpha(fenetre)
+enemy_right_static = pygame.transform.scale(enemy_right_static, FIGURE_SIZE)
 
-anim_enemy = [['e1', 300],
-              ['e2', 300],
-              ['e3', 300]
-              ]
+enemy_right_left = pygame.image.load(path + 'E2_Ennemis_Gauche.png').convert_alpha(fenetre)
+enemy_right_left = pygame.transform.scale(enemy_right_left, FIGURE_SIZE)
+
+enemy_right_right = pygame.image.load(path + 'E2_Ennemis_Droite.png').convert_alpha(fenetre)
+enemy_right_right = pygame.transform.scale(enemy_right_right, FIGURE_SIZE)
+
+### left :
+enemy_left_static = pygame.image.load(path + 'E2_Ennemis.png').convert_alpha(fenetre)
+enemy_left_static = pygame.transform.scale(enemy_left_static, FIGURE_SIZE)
+
+enemy_left_left = pygame.image.load(path + 'E2_Ennemis_Gauche.png').convert_alpha(fenetre)
+enemy_left_left = pygame.transform.scale(enemy_left_left, FIGURE_SIZE)
+
+enemy_left_right = pygame.image.load(path + 'E2_Ennemis_Droite.png').convert_alpha(fenetre)
+enemy_left_right = pygame.transform.scale(enemy_left_right, FIGURE_SIZE)
+
+anim_gamer_right = [
+    ['gamer_right_static', 300],
+    ['gamer_right_left', 300],
+    ['gamer_right_right', 300]
+]
+
+anim_gamer_left = [
+    ['gamer_right_static', 300],
+    ['gamer_right_left', 300],
+    ['gamer_right_right', 300]
+]
+
+anim_enemy_right = [
+    ['enemy_right_static', 300],
+    ['enemy_right_left', 300],
+    ['enemy_right_right', 300]
+]
+anim_enemy_left = [
+    ['enemy_left_static', 300],
+    ['enemy_left_left', 300],
+    ['enemy_left_right', 300]
+]
 
 ##### ANIMATIONS INIT FIN #####
 

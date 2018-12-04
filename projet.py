@@ -818,7 +818,6 @@ def createGamer():
     set_position(gamer, WINDOWS_SIZE[0] / 2 - get_size(gamer)[0] / 2, WINDOWS_SIZE[1] / 2 - get_size(gamer)[1] / 2)
     set_image(gamer, imgE1Joueur)
     visible(gamer)
-    shield_position = (gamer['position'][0], gamer['position'][1])
     gamers.append(gamer)
 
 

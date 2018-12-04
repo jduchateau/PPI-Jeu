@@ -55,12 +55,10 @@ def new_entity(type):
         size = FIGURE_SIZE
         life = 100
         power = 10
-        images = {'debout': imgE1Joueur}
     elif type == "enemy":
         size = FIGURE_SIZE
         life = 10
         power = 0.5
-        images = {'debout': imgE2Ennemis}
     elif type in ("decor1", "decor2", "decor3"):
         size = DECOR_SIZE
 
@@ -302,7 +300,10 @@ def get_actual_image(entity, actualtime):
         # [nomImage,duree]
         nomImage, duree = entity['animations'][name][step]
 
-        nextTime = time + duree
+        if duree == None:
+            nextTime = actualTime + 1  # force vrai
+        else:
+            nextTime = time + duree  # prochain changement
 
         if actualtime < nextTime:
             image = entity['images'][nomImage]
@@ -506,21 +507,24 @@ def move_ennemy(entity, actualTime):
 
 ##### Début GÉNÉRATEUR ######
 
-def new_generator(type, frequency, zone):
+def new_generator(type, frequency, zone, animation, images):
     '''
     Créer un générateur
 
     :param type: "enemy", "decor1", "decor2", "decor3"
     :param frequency: frequence de base en miliseconde
     :param zone: "edge", "all"
-    :param image: Surface
+    :param animation: dictionnaire d'animation
+    :param images:dictionnaire d'images
     :return:
     '''
     return {
         "type": type,
         "frequency": frequency,
         "zone": zone,
-        "new_time": 0
+        "new_time": 0,
+        "animation": animation,
+        "images": images
     }
 
 
@@ -533,7 +537,7 @@ def generate(generator, level, time):
     '''
 
     global gamers, enemies, decors
-    global anim_enemy_right, anim_enemy_left, images_ennemis, imgDecor1, imgDecor2, imgDecor3
+    global anim_enemy_right, anim_enemy_left, images_enemy, imgDecor1, imgDecor2, imgDecor3
 
     if generator['new_time'] < time:
         # Nouveau temps
@@ -553,19 +557,17 @@ def generate(generator, level, time):
         entity = new_entity(generator['type'])
         set_position(entity, position)
 
+        # Ajoute les animations et images
+        create_animation(entity, generator['animation'], generator['images'])
+
         visible(entity)
 
         if generator['type'] == 'enemy':
             set_life(entity, level * 1 / 5, True)
 
-            create_animation(entity, anim_enemy_left, images_ennemis)
-            create_animation(entity, anim_enemy_right)
-
             print(get_life(entity))
             enemies.append(entity)
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:
-            #TODO ajouter les animations des décors
-
             decors.append(entity)
             # Supprime ancien décor en surplut
             if len(decors) > 5:
@@ -889,11 +891,19 @@ def lifeGamer():
 
 
 def createGamer():
-    global gamers
+    global gamers, anim_gamer_left, anim_gamer_right, anim_gamer_left_static, anim_gamer_right_static, images_gamer
     gamer = new_entity('gamer')
 
+    animationsGamer = {
+        'anim_gamer_left': anim_gamer_left,
+        'anim_gamer_right': anim_gamer_right,
+        'anim_gamer_left_static': anim_gamer_left_static,
+        'anim_gamer_right_static': anim_gamer_right_static
+    }
+
+    create_animation(gamer, animationsGamer, images_gamer)
+
     set_position(gamer, WINDOWS_SIZE[0] / 2 - get_size(gamer)[0] / 2, WINDOWS_SIZE[1] / 2 - get_size(gamer)[1] / 2)
-    # TODO
     visible(gamer)
     gamers.append(gamer)
 
@@ -909,20 +919,41 @@ pygame.display.set_caption("Batail des rêves")
 font_title = pygame.font.SysFont('Manjari', 36, True)
 font_small = pygame.font.SysFont('Manjari', 24, True)
 
-# Images
+# Chargement des Images
 path = 'img/'
-imgE1Joueur = pygame.image.load(path + 'E1_Joueur.png').convert_alpha(fenetre)
-imgE1Joueur = pygame.transform.scale(imgE1Joueur, FIGURE_SIZE)
 
-imgE2Ennemis = pygame.image.load(path + 'E2_Ennemis.png').convert_alpha(fenetre)
-imgE2Ennemis = pygame.transform.scale(imgE2Ennemis, FIGURE_SIZE)
+gamer_right_static = pygame.image.load(path + 'Joueur_DS.png').convert_alpha(fenetre)
+gamer_right_static = pygame.transform.scale(gamer_right_static, FIGURE_SIZE)
+gamer_right_left = pygame.image.load(path + 'Joueur_DD.png').convert_alpha(fenetre)
+gamer_right_left = pygame.transform.scale(gamer_right_left, FIGURE_SIZE)
+gamer_right_right = pygame.image.load(path + 'Joueur_DG.png').convert_alpha(fenetre)
+gamer_right_right = pygame.transform.scale(gamer_right_right, FIGURE_SIZE)
+
+gamer_left_static = pygame.image.load(path + 'Joueur_GS.png').convert_alpha(fenetre)
+gamer_left_static = pygame.transform.scale(gamer_left_static, FIGURE_SIZE)
+gamer_left_left = pygame.image.load(path + 'Joueur_GD.png').convert_alpha(fenetre)
+gamer_left_left = pygame.transform.scale(gamer_left_left, FIGURE_SIZE)
+gamer_left_right = pygame.image.load(path + 'Joueur_GG.png').convert_alpha(fenetre)
+gamer_left_right = pygame.transform.scale(gamer_left_right, FIGURE_SIZE)
+
+enemy_right_static = pygame.image.load(path + 'Ennemis_DS.png').convert_alpha(fenetre)
+enemy_right_static = pygame.transform.scale(enemy_right_static, FIGURE_SIZE)
+enemy_right_left = pygame.image.load(path + 'Ennemis_DD.png').convert_alpha(fenetre)
+enemy_right_left = pygame.transform.scale(enemy_right_left, FIGURE_SIZE)
+enemy_right_right = pygame.image.load(path + 'Ennemis_DG.png').convert_alpha(fenetre)
+enemy_right_right = pygame.transform.scale(enemy_right_right, FIGURE_SIZE)
+
+enemy_left_static = pygame.image.load(path + 'Ennemis_GS.png').convert_alpha(fenetre)
+enemy_left_static = pygame.transform.scale(enemy_left_static, FIGURE_SIZE)
+enemy_left_left = pygame.image.load(path + 'Ennemis_GG.png').convert_alpha(fenetre)
+enemy_left_left = pygame.transform.scale(enemy_left_left, FIGURE_SIZE)
+enemy_left_right = pygame.image.load(path + 'Ennemis_GD.png').convert_alpha(fenetre)
+enemy_left_right = pygame.transform.scale(enemy_left_right, FIGURE_SIZE)
 
 imgDecor1 = pygame.image.load(path + 'Decor_1.png').convert_alpha(fenetre)
 imgDecor1 = pygame.transform.scale(imgDecor1, DECOR_SIZE)
-
 imgDecor2 = pygame.image.load(path + 'Decor_2.png').convert_alpha(fenetre)
 imgDecor2 = pygame.transform.scale(imgDecor2, DECOR_SIZE)
-
 imgDecor3 = pygame.image.load(path + 'Decor_3.png').convert_alpha(fenetre)
 imgDecor3 = pygame.transform.scale(imgDecor3, DECOR_SIZE)
 
@@ -932,65 +963,11 @@ imgShield = pygame.transform.scale(imgShield, SHIELD_SIZE)
 imgGun = pygame.image.load(path + 'Attaque.png').convert_alpha(fenetre)
 imgGun = pygame.transform.scale(imgGun, GUN_SIZE)
 imgGun = pygame.transform.rotate(imgGun, -90)
-
 imgGunEnnemy = pygame.image.load(path + 'Attaque_Ennemy.png').convert_alpha(fenetre)
 imgGunEnnemy = pygame.transform.scale(imgGunEnnemy, GUN_SIZE)
 imgGunEnnemy = pygame.transform.rotate(imgGunEnnemy, -90)
 
-# Generateurs
-enemiesGenerator = new_generator('enemy', 5 * 1000, 'edge', imgE2Ennemis)
-decor1Generator = new_generator('decor1', 5 * 1000, 'all', imgDecor1)
-decor2Generator = new_generator('decor2', 10 * 1000, 'all', imgDecor2)
-decor3Generator = new_generator('decor3', 10 * 1000, 'all', imgDecor3)
-
-# Jauge de vie
-gaugeLife = new_gauge(pygame.Rect(GAUGE_POSITION[0], GAUGE_POSITION[1], GAUGE_SIZE[0], GAUGE_SIZE[1]), lifeGamer)
-
-##### OBJECTS INI FIN #####
-
-##### ANIMATIONS INIT DEBUT #####
-########### gamer :
-### right :
-gamer_right_static = pygame.image.load(path + 'Joueur_DS.png').convert_alpha(fenetre)
-gamer_right_static = pygame.transform.scale(gamer_right_static, FIGURE_SIZE)
-
-gamer_right_left = pygame.image.load(path + 'Joueur_DD.png').convert_alpha(fenetre)
-gamer_right_left = pygame.transform.scale(gamer_right_left, FIGURE_SIZE)
-
-gamer_right_right = pygame.image.load(path + 'Joueur_DG.png').convert_alpha(fenetre)
-gamer_right_right = pygame.transform.scale(gamer_right_right, FIGURE_SIZE)
-
-### left :
-gamer_left_static = pygame.image.load(path + 'Joueur_GS.png').convert_alpha(fenetre)
-gamer_left_static = pygame.transform.scale(gamer_left_static, FIGURE_SIZE)
-
-gamer_left_left = pygame.image.load(path + 'Joueur_GD.png').convert_alpha(fenetre)
-gamer_left_left = pygame.transform.scale(gamer_left_left, FIGURE_SIZE)
-
-gamer_left_right = pygame.image.load(path + 'Joueur_GG.png').convert_alpha(fenetre)
-gamer_left_right = pygame.transform.scale(gamer_left_right, FIGURE_SIZE)
-
-########### ennemy :
-### right :
-enemy_right_static = pygame.image.load(path + 'Ennemis_DS.png').convert_alpha(fenetre)
-enemy_right_static = pygame.transform.scale(enemy_right_static, FIGURE_SIZE)
-
-enemy_right_left = pygame.image.load(path + 'Ennemis_DD.png').convert_alpha(fenetre)
-enemy_right_left = pygame.transform.scale(enemy_right_left, FIGURE_SIZE)
-
-enemy_right_right = pygame.image.load(path + 'Ennemis_DG.png').convert_alpha(fenetre)
-enemy_right_right = pygame.transform.scale(enemy_right_right, FIGURE_SIZE)
-
-### left :
-enemy_left_static = pygame.image.load(path + 'Ennemis_GS.png').convert_alpha(fenetre)
-enemy_left_static = pygame.transform.scale(enemy_left_static, FIGURE_SIZE)
-
-enemy_left_left = pygame.image.load(path + 'Ennemis_GG.png').convert_alpha(fenetre)
-enemy_left_left = pygame.transform.scale(enemy_left_left, FIGURE_SIZE)
-
-enemy_left_right = pygame.image.load(path + 'Ennemis_GD.png').convert_alpha(fenetre)
-enemy_left_right = pygame.transform.scale(enemy_left_right, FIGURE_SIZE)
-
+# Listes d'images
 images_gamer = {
     'gamer_right_static': gamer_right_static,
     'gamer_right_left': gamer_right_left,
@@ -1000,7 +977,7 @@ images_gamer = {
     'gamer_left_right': gamer_right_right
 }
 
-images_ennemis = {
+images_enemy = {
     'enemy_right_static': enemy_right_static,
     'enemy_right_left': enemy_right_left,
     'enemy_right_right': enemy_right_right,
@@ -1008,6 +985,25 @@ images_ennemis = {
     'enemy_left_left': enemy_left_left,
     'enemy_left_right': enemy_right_right
 }
+
+images_decor1 = {
+    'decor1': imgDecor1
+}
+images_decor2 = {
+    'decor2': imgDecor2
+}
+images_decor3 = {
+    'decor3': imgDecor3
+}
+
+# Animations
+anim_gamer_right_static = [
+    ['gamer_right_static', None]
+]
+
+anim_gamer_left_static = [
+    ['gamer_left_static', None]
+]
 
 anim_gamer_right = [
     ['gamer_right_static', 300],
@@ -1023,6 +1019,14 @@ anim_gamer_left = [
     ['gamer_right_right', 300]
 ]
 
+anim_enemy_right_static = [
+    ['enemy_right_static', None]
+]
+
+anim_enemy_left_static = [
+    ['enemy_left_static', None]
+]
+
 anim_enemy_right = [
     ['enemy_right_static', 300],
     ['enemy_right_right', 300],
@@ -1036,20 +1040,27 @@ anim_enemy_left = [
     ['enemy_right_static', 300],
     ['enemy_right_right', 300]
 ]
+animationsEnemy = {
+    'anim_enemy_left': anim_enemy_left,
+    'anim_enemy_left_static': anim_enemy_left_static,
+    'anim_enemy_right': anim_enemy_right,
+    'anim_enemy_right_static': anim_enemy_right_static,
+}
 
-anim_decor1 = [
-    ['decor1', None]
-]
+animationsDecor1 = {'anim_decor1': [['decor1', None]]}
+animationsDecor2 = {'anim_decor2': [['decor2', None]]}
+animationsDecor3 = {'anim_decor3': [['decor3', None]]}
 
-anim_decor2 = [
-    ['decor2', None]
-]
+# Generateurs
+enemiesGenerator = new_generator('enemy', 5 * 1000, 'edge', animationsEnemy, images_enemy)
+decor1Generator = new_generator('decor1', 5 * 1000, 'all', animationsDecor1, images_decor1)
+decor2Generator = new_generator('decor2', 10 * 1000, 'all', animationsDecor2, images_decor2)
+decor3Generator = new_generator('decor3', 10 * 1000, 'all', animationsDecor3, images_decor3)
 
-anim_decor3 = [
-    ['decor3', None]
-]
+# Jauge de vie
+gaugeLife = new_gauge(pygame.Rect(GAUGE_POSITION[0], GAUGE_POSITION[1], GAUGE_SIZE[0], GAUGE_SIZE[1]), lifeGamer)
 
-##### ANIMATIONS INIT FIN #####
+##### OBJECTS INI FIN #####
 
 
 ##### VARIABLES #####

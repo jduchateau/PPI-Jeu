@@ -261,6 +261,42 @@ def set_life(entity, life, relatif=False):
         entity['life'] = life
 
 
+
+##### Fin ENTITEE ######
+
+
+##### Début ANIMATION ######
+
+def create_animation(entity, animation, images=False):
+    '''
+    Creer une animation
+    :param entity: le nom de l'entité
+    :param animation: nom : [{Nom_Image, Temps}, ...]
+    :param images: la posibilité d'ajouter des objets de surface nommée
+    '''
+
+def start_animation(entity, animation_name, retepe):
+    '''
+    Commencer une animation
+    :param entity: le nom de l'entité
+    :param animation_name: le nom de l'animation
+    :param retepe: le nombre de fois que l'animation va etre répétée
+    '''
+
+def stop_animation(entity, animation_name):
+    '''
+    Arreter une animation
+    :param entity: le nom de l'entité
+    :param animation_name: le nom de l'animation
+    '''
+
+def get_actual_image(entity):
+    '''
+    Retourne la surface affichée actuelement
+    :param entity: le nom de l'entité
+    :return: surface
+    '''
+
 def draw(entity, ecran, time):
     '''
     Dessine l'entité sur la fenetre selon les parametres de celle ci.
@@ -296,7 +332,7 @@ def draw(entity, ecran, time):
         ecran.blit(imgGunRotated, entity['gun']['position'])
 
 
-##### FIN ENTITE ######
+##### Fin ANIMATION ######
 
 ### Début DÉPLACEMENT ####
 

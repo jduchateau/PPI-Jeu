@@ -253,6 +253,7 @@ def set_life(entity, life, relatif=False):
         entity['life'] = life
 
 
+
 ##### Fin ENTITEE ######
 
 
@@ -395,12 +396,14 @@ def speed(entity, point, axe):
     return speed
 
 
-def move_gamer(entity):
+def move_gamer(entity, temps):
     '''
     Déplace un joueur
     :param entity:
     '''
     global mx, my
+    start_animation(entity, 'marcheG', temps, True)
+    start_animation(entity, 'marcheD', temps, True)
 
     # verifie vitese (compare si la x > ou < xmouse et si y > ou < que ymouse) et modifier la vitesse
     vx = speed(entity, mx, 0)
@@ -436,7 +439,8 @@ def move_ennemy(entity, actualTime):
 
     :param entity:
     '''
-
+    start_animation(entity, 'marcheG', actualTime, True)
+    start_animation(entity, 'marcheD', actualTime, True)
     # Si pas actif on s'arrête ici
     if not is_active(entity):
         # Et si l'entité a expire la supprime
@@ -949,7 +953,42 @@ decor3Generator = new_generator('decor3', 10 * 1000, 'all', imgDecor3)
 # Jauge de vie
 gaugeLife = new_gauge(pygame.Rect(GAUGE_POSITION[0], GAUGE_POSITION[1], GAUGE_SIZE[0], GAUGE_SIZE[1]), lifeGamer)
 
-##### OBJECTS INI END #####
+##### OBJECTS INI FIN #####
+
+##### ANIMATIONS INIT DEBUT #####
+## gamer :
+j1 = pygame.image.load(path + 'E1_Joueur.png').convert_alpha(fenetre)
+j1 = pygame.transform.scale(j1, FIGURE_SIZE)
+
+j2 = pygame.image.load(path + 'E1_Joueur_Gauche.png').convert_alpha(fenetre)
+j2 = pygame.transform.scale(j2, FIGURE_SIZE)
+
+j3 = pygame.image.load(path + 'E1_Joueur_Droite.png').convert_alpha(fenetre)
+j3 = pygame.transform.scale(j3, FIGURE_SIZE)
+
+## ennemy :
+e1 = pygame.image.load(path + 'E2_Ennemis.png').convert_alpha(fenetre)
+e1 = pygame.transform.scale(e1, FIGURE_SIZE)
+
+e2 = pygame.image.load(path + 'E2_Ennemis_Gauche.png').convert_alpha(fenetre)
+e2 = pygame.transform.scale(e2, FIGURE_SIZE)
+
+e3 = pygame.image.load(path + 'E2_Ennemis_Droite.png').convert_alpha(fenetre)
+e3 = pygame.transform.scale(e3, FIGURE_SIZE)
+
+anim_gamer = [
+                ['e1', 300],
+                ['e2', 300],
+                ['e3', 300]
+                ]
+
+anim_enemy = [['e1', 300],
+              ['e2', 300],
+              ['e3', 300]
+              ]
+
+##### ANIMATIONS INIT FIN #####
+
 
 ##### VARIABLES #####
 temps = pygame.time.Clock()

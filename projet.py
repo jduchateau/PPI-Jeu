@@ -245,7 +245,7 @@ def create_animation(entity, animation, images=False):
     '''
     entity['animations'].update(animation)
 
-    if images is dict:
+    if isinstance(images, dict):
         entity['images'].update(images)
 
 
@@ -289,13 +289,18 @@ def get_actual_image(entity, actualtime):
     repete = entity['actualAnimation']['repete']
 
     if name != '' and name in entity['animations']:
-        # [nomImage,duree]
         nomImage, duree = entity['animations'][name][step]
+
+        print('get_actual_image():nomImage', nomImage)
+        print('get_actual_image():duree', duree)
 
         if duree == None:
             nextTime = actualTime + 1  # force vrai
         else:
             nextTime = time + duree  # prochain changement
+
+        print('get_actual_image():actualTime', actualTime)
+        print('get_actual_image():nextTime', nextTime)
 
         if actualtime < nextTime:
             image = entity['images'][nomImage]
@@ -311,6 +316,10 @@ def get_actual_image(entity, actualtime):
 
             nomImage = entity['animations'][name][step][0]
             return entity['images'][nomImage]
+    else:
+        print('get_actual_image():entity')
+        pprint(entity)
+        return None
 
 
 def draw(entity, ecran, time):
@@ -328,12 +337,6 @@ def draw(entity, ecran, time):
     surface = get_actual_image(entity, time)
     if surface != None:
         ecran.blit(surface, get_position(entity, True))
-    else:
-        print('draw():surface')
-        pprint(surface)
-        print('draw():entity')
-        pprint(entity)
-        exit(5)
 
     if is_active(entity['shield']) and entity['type'] == "gamer":
         entity['shield']['position'][0] = entity['position'][0] - 5
@@ -997,48 +1000,48 @@ images_decor3 = {
 
 # Animations
 anim_gamer_right_static = [
-    ['gamer_right_static', None]
+    ('gamer_right_static', None)
 ]
 
 anim_gamer_left_static = [
-    ['gamer_left_static', None]
+    ('gamer_left_static', None)
 ]
 
 anim_gamer_right = [
-    ['gamer_right_static', 300],
-    ['gamer_right_right', 300],
-    ['gamer_right_static', 300],
-    ['gamer_right_right', 300]
+    ('gamer_right_static', 300),
+    ('gamer_right_right', 300),
+    ('gamer_right_static', 300),
+    ('gamer_right_right', 300)
 ]
 
 anim_gamer_left = [
-    ['gamer_right_static', 300],
-    ['gamer_right_left', 300],
-    ['gamer_right_static', 300],
-    ['gamer_right_right', 300]
+    ('gamer_right_static', 300),
+    ('gamer_right_left', 300),
+    ('gamer_right_static', 300),
+    ('gamer_right_right', 300)
 ]
 
-anim_enemy_right_static = [
-    ['enemy_right_static', None]
-]
+anim_enemy_right_static = (
+    ('enemy_right_static', None),
+)
 
-anim_enemy_left_static = [
-    ['enemy_left_static', None]
-]
+anim_enemy_left_static = (
+    ('enemy_left_static', None),
+)
 
-anim_enemy_right = [
-    ['enemy_right_static', 300],
-    ['enemy_right_right', 300],
-    ['enemy_right_static', 300],
-    ['enemy_right_right', 300]
-]
+anim_enemy_right = (
+    ('enemy_right_static', 300),
+    ('enemy_right_right', 300),
+    ('enemy_right_static', 300),
+    ('enemy_right_right', 300)
+)
 
-anim_enemy_left = [
-    ['enemy_right_static', 300],
-    ['enemy_right_left', 300],
-    ['enemy_right_static', 300],
-    ['enemy_right_right', 300]
-]
+anim_enemy_left = (
+    ('enemy_right_static', 300),
+    ('enemy_right_left', 300),
+    ('enemy_right_static', 300),
+    ('enemy_right_right', 300)
+)
 animationsEnemy = {
     'anim_enemy_left': anim_enemy_left,
     'anim_enemy_left_static': anim_enemy_left_static,
@@ -1046,9 +1049,9 @@ animationsEnemy = {
     'anim_enemy_right_static': anim_enemy_right_static,
 }
 
-animationsDecor1 = {'anim_decor1': [['decor1', None]]}
-animationsDecor2 = {'anim_decor2': [['decor2', None]]}
-animationsDecor3 = {'anim_decor3': [['decor3', None]]}
+animationsDecor1 = {'anim_decor1': (('decor1', None))}
+animationsDecor2 = {'anim_decor2': (('decor2', None))}
+animationsDecor3 = {'anim_decor3': (('decor3', None))}
 
 # Generateurs
 enemiesGenerator = new_generator('enemy', 5 * 1000, 'edge', animationsEnemy, images_enemy)

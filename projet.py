@@ -102,7 +102,7 @@ def new_entity(type):
         'enemy': extra,
         'animations': {},
         'images': images,
-        'actualAnimation': {'name', 'step', 'time', 'repete'}
+        'actualAnimation': {'name': '', 'step': None, 'time': None, 'repete': False}
     }
 
 

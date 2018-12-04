@@ -1,7 +1,8 @@
-﻿import math
-import random
+from pprint import pprint
 
 import pygame
+import math
+import random
 
 ##### VARIABLES & CONSTANTES #####
 
@@ -260,6 +261,7 @@ def set_life(entity, life, relatif=False):
         entity['life'] = life
 
 
+
 ##### Fin ENTITEE ######
 
 
@@ -272,6 +274,10 @@ def create_animation(entity, animation, images=False):
     :param animation: nom : [{Nom_Image, Temps}, ...]
     :param images: la posibilité d'ajouter des objets de surface nommée
     '''
+    entity['animations'].append(animation)
+
+    if not images:
+        entity['images'].update(images)
 
 
 def start_animation(entity, animation_name, temps, retepe):
@@ -288,15 +294,14 @@ def start_animation(entity, animation_name, temps, retepe):
     entity['actualAnimation']['time'] = actual_time
     entity['actualAnimation']['repete'] = retepe
 
-
 def stop_animation(entity, animation_name):
     '''
     Arreter une animation
     :param entity: le nom de l'entité
     :param animation_name: le nom de l'animation
     '''
-    # entity['actualAnimation']['name'] = ''
-    # entity['actualAnimation']['step'] = None
+    entity['actualAnimation']['name'] = ''
+    entity['actualAnimation']['step'] = None
     entity['actualAnimation']['time'] = None
     entity['actualAnimation']['repete'] = False
 
@@ -307,7 +312,6 @@ def get_actual_image(entity):
     :param entity: le nom de l'entité
     :return: surface
     '''
-
 
 def draw(entity, ecran, time):
     '''

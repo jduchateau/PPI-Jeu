@@ -251,7 +251,7 @@ def create_animation(entity, animation, images=False):
     :param animation: nom : [{Nom_Image, Temps}, ...]
     :param images: la posibilité d'ajouter des objets de surface nommée
     '''
-    entity['animations'].append(animation)
+    entity['animations'].update(animation)
 
     if not images:
         entity['images'].update(images)
@@ -334,7 +334,12 @@ def draw(entity, ecran, time):
         return
 
     surface = get_actual_image(entity, time)
-    ecran.blit(surface, get_position(entity, True))
+    if surface != None:
+        ecran.blit(surface, get_position(entity, True))
+    else:
+        print('draw(): surface :')
+        pprint(surface)
+        exit(5)
 
     if is_active(entity['shield']) and entity['type'] == "gamer":
         entity['shield']['position'][0] = entity['position'][0] - 5
@@ -1103,7 +1108,7 @@ while not fini:
         for enemy in enemies:
             move_ennemy(enemy, actualTime)
 
-        move_gamer(gamers[0])
+        move_gamer(gamers[0], actualTime)
 
         auto_attack(enemies, gamers[0], actualTime)
         if is_active(gamers[0]):

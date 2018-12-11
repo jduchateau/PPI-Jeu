@@ -7,8 +7,8 @@ import random
 
 ##### VARIABLES & CONSTANTES #####
 
-WINDOWS_SIZE = (1000, 800)
-
+ZOOM = 0.8
+WINDOWS_SIZE = (int(1000*ZOOM), int(800*ZOOM))
 GREY = (198, 186, 183)
 BLACK = (52, 51, 50)
 RED = (255, 70, 70)
@@ -21,17 +21,17 @@ SPEED_MAX = 10
 SPEED_MIN = 5
 DIST_MOVE_MAX = 200
 
-FIGURE_SIZE = (90, 115)
-SHIELD_SIZE = (100, 120)
-GUN_SIZE = (83, 114)
-DECOR_SIZE = (300, 300)
+FIGURE_SIZE = (int(90*ZOOM), int(115*ZOOM))
+SHIELD_SIZE = (int(100*ZOOM), int(120*ZOOM))
+GUN_SIZE = (int(83*ZOOM), int(114*ZOOM))
+DECOR_SIZE = (int(300*ZOOM), int(300*ZOOM))
 
 DIST_ATTACK_MAX = 150  # px
 ATTACK_DURATION = 500  # ms
 DIST_ENEMY_MIN = 90
 
-GAUGE_SIZE = 100, 30
-GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - 50, 50
+GAUGE_SIZE = int(100*ZOOM), int(30*ZOOM)
+GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - int(50*ZOOM), int(50*ZOOM)
 
 
 ##### FONCTIONS #####
@@ -50,7 +50,7 @@ def new_entity(type):
     images = {}
     size_shield = SHIELD_SIZE
     size_gun = GUN_SIZE
-
+    # size_gun = 0
     extra = {}
     if type == "gamer":
         size = FIGURE_SIZE
@@ -352,8 +352,8 @@ def draw(entity, ecran, time):
             imgGunRotated = pygame.transform.rotate(imgGun, entity['gun']['direction'])
         else:
             imgGunRotated = pygame.transform.rotate(imgGunEnnemy, entity['gun']['direction'])
-
         ecran.blit(imgGunRotated, entity['gun']['position'])
+
 
 
 ##### Fin ANIMATION ######
@@ -417,7 +417,7 @@ def move_gamer(entity, temps):
     if ((entity['position'][1] + entity['size'][1] / 2) != my):
         entity['position'][1] += vy
 
-    if (vx == 0 and vy == 1):
+    if (vx == 0 and vy == 0):
         start_animation(entity, 'anim_gamer_' + entity['actual_direction_img'] + '_static', temps, True)
     else:
         if (vx < 0 and is_animated(entity)[1] != "anim_gamer_left"):
@@ -840,6 +840,7 @@ def draw_intro_menu(fenetre):
     explanation_text = "Utiliser la souris et la barre d'espace"
 
     title = font_title.render(title_text, True, BLACK)
+    # title = font_title.render(title_text, True, BLACK)
     title_width, title_height = font_title.size(title_text)
 
     explanation = font_small.render(explanation_text, True, BLACK)
@@ -977,10 +978,20 @@ enemy_left_right = pygame.transform.scale(enemy_left_right, FIGURE_SIZE)
 
 imgDecor1 = pygame.image.load(path + 'Decor_1.png').convert_alpha(fenetre)
 imgDecor1 = pygame.transform.scale(imgDecor1, DECOR_SIZE)
+
 imgDecor2 = pygame.image.load(path + 'Decor_2.png').convert_alpha(fenetre)
 imgDecor2 = pygame.transform.scale(imgDecor2, DECOR_SIZE)
+imgDecor2b = pygame.image.load(path + 'Decor_2b.png').convert_alpha(fenetre)
+imgDecor2b = pygame.transform.scale(imgDecor2b, DECOR_SIZE)
+imgDecor2c = pygame.image.load(path + 'Decor_2c.png').convert_alpha(fenetre)
+imgDecor2c = pygame.transform.scale(imgDecor2c, DECOR_SIZE)
+imgDecor2d = pygame.image.load(path + 'Decor_2d.png').convert_alpha(fenetre)
+imgDecor2d = pygame.transform.scale(imgDecor2d, DECOR_SIZE)
+
 imgDecor3 = pygame.image.load(path + 'Decor_3.png').convert_alpha(fenetre)
 imgDecor3 = pygame.transform.scale(imgDecor3, DECOR_SIZE)
+imgDecor3b = pygame.image.load(path + 'Decor_3b.png').convert_alpha(fenetre)
+imgDecor3b = pygame.transform.scale(imgDecor3b, DECOR_SIZE)
 
 imgShield = pygame.image.load(path + 'Bouclier.png').convert_alpha(fenetre)
 imgShield = pygame.transform.scale(imgShield, SHIELD_SIZE)
@@ -1015,10 +1026,14 @@ images_decor1 = {
     'decor1': imgDecor1
 }
 images_decor2 = {
-    'decor2': imgDecor2
+    'decor2': imgDecor2,
+    'decor2b': imgDecor2b,
+    'decor2c': imgDecor2c,
+    'decor2d': imgDecor2d
 }
 images_decor3 = {
-    'decor3': imgDecor3
+    'decor3': imgDecor3,
+    'decor3b': imgDecor3b
 }
 
 # Animations
@@ -1073,8 +1088,8 @@ animationsEnemy = {
 }
 
 animationsDecor1 = {'anim_decor1': (('decor1', None), ('decor1', None))}
-animationsDecor2 = {'anim_decor2': (('decor2', None), ('decor2', None))}
-animationsDecor3 = {'anim_decor3': (('decor3', None), ('decor3', None))}
+animationsDecor2 = {'anim_decor2': (('decor2', 80), ('decor2b', 80), ('decor2c', 80), ('decor2d', 80))}
+animationsDecor3 = {'anim_decor3': (('decor3', 200), ('decor3b', 200))}
 
 # Generateurs
 enemiesGenerator = new_generator('enemy', 5 * 1000, 'edge', animationsEnemy, images_enemy)

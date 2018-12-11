@@ -503,7 +503,6 @@ def move_ennemy(entity, actualTime):
         vitessey = randy
 
     # Animation
-    print(vitessex, vitessey)
     if (vitessex == 0 and vitessey == 0):
         start_animation(entity, 'anim_enemy_' + entity['actual_direction_img'] + '_static', actualTime, True)
     else:

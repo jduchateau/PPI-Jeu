@@ -1,7 +1,4 @@
-﻿from pprint import pprint
-
-import pygame
-import pygame.freetype
+﻿import pygame
 import math
 import random
 
@@ -584,7 +581,6 @@ def generate(generator, level, time):
 
         if generator['type'] == 'enemy':
             set_life(entity, math.log(level+1), True)
-            print("Vie",get_life(entity))
 
             enemies.append(entity)
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:

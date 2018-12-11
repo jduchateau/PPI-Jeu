@@ -588,6 +588,10 @@ def generate(generator, level, time):
 
             enemies.append(entity)
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:
+            start_animation(entity, 'anim_' + generator['type'], time, True)
+
+            pprint(entity)
+
             decors.append(entity)
             # Supprime ancien décor en surplut
             if len(decors) > 5:
@@ -1068,9 +1072,9 @@ animationsEnemy = {
     'anim_enemy_right_static': anim_enemy_right_static,
 }
 
-animationsDecor1 = {'anim_decor1': (('decor1', None))}
-animationsDecor2 = {'anim_decor2': (('decor2', None))}
-animationsDecor3 = {'anim_decor3': (('decor3', None))}
+animationsDecor1 = {'anim_decor1': (('decor1', None), ('decor1', None))}
+animationsDecor2 = {'anim_decor2': (('decor2', None), ('decor2', None))}
+animationsDecor3 = {'anim_decor3': (('decor3', None), ('decor3', None))}
 
 # Generateurs
 enemiesGenerator = new_generator('enemy', 5 * 1000, 'edge', animationsEnemy, images_enemy)

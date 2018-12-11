@@ -381,7 +381,7 @@ def speed(entity, point, axe):
     elif (dist > DIST_MOVE_MAX):
         speed = SPEED_MAX
     else:
-        if ((entity['position'][axe] + entity['size'][axe] // 2) != point):
+        if (int(entity['position'][axe] + entity['size'][axe] / 2) != point):
             speed = 1
         else:
             speed = 0

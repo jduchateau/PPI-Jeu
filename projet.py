@@ -1,4 +1,4 @@
-from pprint import pprint
+﻿from pprint import pprint
 
 import pygame
 import pygame.freetype
@@ -95,7 +95,8 @@ def new_entity(type):
         'enemy': extra,
         'animations': {},
         'images': images,
-        'actualAnimation': {'name': '', 'step': None, 'time': None, 'repete': False}
+        'actualAnimation': {'name': '', 'step': None, 'time': None, 'repete': False},
+        'actual_direction_img': 'right'
     }
 
 
@@ -290,22 +291,16 @@ def get_actual_image(entity, actualtime):
 
     name = entity['actualAnimation']['name']
     step = entity['actualAnimation']['step']
-    time = entity['actualAnimation']['time']
+    animTime = entity['actualAnimation']['time']
     repete = entity['actualAnimation']['repete']
 
     if name != '' and name in entity['animations']:
         nomImage, duree = entity['animations'][name][step]
 
-        print('get_actual_image():nomImage', nomImage)
-        print('get_actual_image():duree', duree)
-
         if duree == None:
             nextTime = actualTime + 1  # force vrai
         else:
-            nextTime = time + duree  # prochain changement
-
-        print('get_actual_image():actualTime', actualTime)
-        print('get_actual_image():nextTime', nextTime)
+            nextTime = animTime + duree  # prochain changement
 
         if actualtime < nextTime:
             image = entity['images'][nomImage]
@@ -320,12 +315,10 @@ def get_actual_image(entity, actualtime):
                 step += 1
 
             entity['actualAnimation']['step'] = step
-            entity['actualAnimation']['time'] = time
+            entity['actualAnimation']['time'] = actualTime
             nomImage = entity['animations'][name][step][0]
             return entity['images'][nomImage]
     else:
-        print('get_actual_image():entity')
-        pprint(entity)
         return None
 
 
@@ -400,9 +393,6 @@ def move_gamer(entity, temps):
     '''
     global mx, my
 
-    if (not is_animated(entity)[0]):
-        start_animation(entity, 'anim_gamer_left', temps, True)
-
     # verifie vitese (compare si la x > ou < xmouse et si y > ou < que ymouse) et modifier la vitesse
     vx = speed(entity, mx, 0)
     vy = speed(entity, my, 1)
@@ -427,6 +417,16 @@ def move_gamer(entity, temps):
     if ((entity['position'][1] + entity['size'][1] / 2) != my):
         entity['position'][1] += vy
 
+    if (vx == 0 and vy == 1):
+        start_animation(entity, 'anim_gamer_' + entity['actual_direction_img'] + '_static', temps, True)
+    else:
+        if (vx < 0 and is_animated(entity)[1] != "anim_gamer_left"):
+            start_animation(entity, 'anim_gamer_left', temps, True)
+            entity['actual_direction_img'] = 'left'
+        elif (vx > 0 and is_animated(entity)[1] != "anim_gamer_right"):
+            start_animation(entity, 'anim_gamer_right', temps, True)
+            entity['actual_direction_img'] = 'right'
+
 
 def move_ennemy(entity, actualTime):
     '''
@@ -437,7 +437,6 @@ def move_ennemy(entity, actualTime):
 
     :param entity:
     '''
-    start_animation(entity, 'anim_enemy_right', actualTime, True)
 
     # Si pas actif on s'arrête ici
     if not is_active(entity):
@@ -502,6 +501,18 @@ def move_ennemy(entity, actualTime):
             deplace_dist -= 1
         vitessex = randx
         vitessey = randy
+
+    # Animation
+    print(vitessex, vitessey)
+    if (vitessex == 0 and vitessey == 0):
+        start_animation(entity, 'anim_enemy_' + entity['actual_direction_img'] + '_static', actualTime, True)
+    else:
+        if (vitessex < 0 and is_animated(entity)[1] != "anim_enemy_left"):
+            start_animation(entity, 'anim_enemy_left', actualTime, True)
+            entity['actual_direction_img'] = 'left'
+        elif (vitessex > 0 and is_animated(entity)[1] != "anim_enemy_right"):
+            start_animation(entity, 'anim_enemy_right', actualTime, True)
+            entity['actual_direction_img'] = 'right'
 
     # Applique le déplacement
     entity['position'][0] += vitessex
@@ -575,7 +586,6 @@ def generate(generator, level, time):
         if generator['type'] == 'enemy':
             set_life(entity, level * 1 / 5, True)
 
-            print(get_life(entity))
             enemies.append(entity)
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:
             decors.append(entity)
@@ -985,7 +995,7 @@ images_gamer = {
     'gamer_right_right': gamer_right_right,
     'gamer_left_static': gamer_left_static,
     'gamer_left_left': gamer_left_left,
-    'gamer_left_right': gamer_right_right
+    'gamer_left_right': gamer_left_right
 }
 
 images_enemy = {
@@ -994,7 +1004,7 @@ images_enemy = {
     'enemy_right_right': enemy_right_right,
     'enemy_left_static': enemy_left_static,
     'enemy_left_left': enemy_left_left,
-    'enemy_left_right': enemy_right_right
+    'enemy_left_right': enemy_left_right
 }
 
 images_decor1 = {
@@ -1017,17 +1027,17 @@ anim_gamer_left_static = [
 ]
 
 anim_gamer_right = [
-    ('gamer_right_static', 300),
-    ('gamer_right_right', 300),
-    ('gamer_right_static', 300),
-    ('gamer_right_right', 300)
+    ('gamer_right_static', 100),
+    ('gamer_right_right', 100),
+    ('gamer_right_static', 100),
+    ('gamer_right_right', 100)
 ]
 
 anim_gamer_left = [
-    ('gamer_right_static', 300),
-    ('gamer_right_left', 300),
-    ('gamer_right_static', 300),
-    ('gamer_right_right', 300)
+    ('gamer_left_static', 100),
+    ('gamer_left_left', 100),
+    ('gamer_left_static', 100),
+    ('gamer_left_right', 100)
 ]
 
 anim_enemy_right_static = (
@@ -1042,14 +1052,14 @@ anim_enemy_right = (
     ('enemy_right_static', 300),
     ('enemy_right_right', 300),
     ('enemy_right_static', 300),
-    ('enemy_right_right', 300)
+    ('enemy_right_left', 300)
 )
 
 anim_enemy_left = (
-    ('enemy_right_static', 300),
-    ('enemy_right_left', 300),
-    ('enemy_right_static', 300),
-    ('enemy_right_right', 300)
+    ('enemy_left_static', 300),
+    ('enemy_left_left', 300),
+    ('enemy_left_static', 300),
+    ('enemy_left_right', 300)
 )
 animationsEnemy = {
     'anim_enemy_left': anim_enemy_left,

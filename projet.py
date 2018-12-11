@@ -583,14 +583,12 @@ def generate(generator, level, time):
         visible(entity)
 
         if generator['type'] == 'enemy':
-            set_life(entity, level * 1 / 5, True)
+            set_life(entity, math.log(level+1), True)
+            print("Vie",get_life(entity))
 
             enemies.append(entity)
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:
             start_animation(entity, 'anim_' + generator['type'], time, True)
-
-            pprint(entity)
-
             decors.append(entity)
             # Supprime ancien décor en surplut
             if len(decors) > 5:

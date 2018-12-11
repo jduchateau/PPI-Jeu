@@ -1,6 +1,7 @@
 ﻿from pprint import pprint
 
 import pygame
+import pygame.freetype
 import math
 import random
 
@@ -94,7 +95,8 @@ def new_entity(type):
         'enemy': extra,
         'animations': {},
         'images': images,
-        'actualAnimation': {'name': '', 'step': None, 'time': None, 'repete': False}
+        'actualAnimation': {'name': '', 'step': None, 'time': None, 'repete': False},
+        'actual_direction_img': 'right'
     }
 
 
@@ -249,19 +251,23 @@ def create_animation(entity, animation, images=False):
         entity['images'].update(images)
 
 
-def start_animation(entity, animation_name, temps, retepe):
+def start_animation(entity, animation_name, temps, repete):
     '''
     Commencer une animation
     :param entity: le nom de l'entité
     :param animation_name: le nom de l'animation
     :param temps : temps actuen en milisecondes
-    :param retepe: le nombre de fois que l'animation va etre répétée
+    :param repete: le nombre de fois que l'animation va etre répétée
     '''
     actual_time = temps
     entity['actualAnimation']['name'] = animation_name
     entity['actualAnimation']['step'] = 0
     entity['actualAnimation']['time'] = actual_time
-    entity['actualAnimation']['repete'] = retepe
+    entity['actualAnimation']['repete'] = repete
+
+
+def is_animated(entity):
+    return entity['actualAnimation']['name'] != '', entity['actualAnimation']['name']
 
 
 def stop_animation(entity):
@@ -285,22 +291,16 @@ def get_actual_image(entity, actualtime):
 
     name = entity['actualAnimation']['name']
     step = entity['actualAnimation']['step']
-    time = entity['actualAnimation']['time']
+    animTime = entity['actualAnimation']['time']
     repete = entity['actualAnimation']['repete']
 
     if name != '' and name in entity['animations']:
         nomImage, duree = entity['animations'][name][step]
 
-        print('get_actual_image():nomImage', nomImage)
-        print('get_actual_image():duree', duree)
-
         if duree == None:
             nextTime = actualTime + 1  # force vrai
         else:
-            nextTime = time + duree  # prochain changement
-
-        print('get_actual_image():actualTime', actualTime)
-        print('get_actual_image():nextTime', nextTime)
+            nextTime = animTime + duree  # prochain changement
 
         if actualtime < nextTime:
             image = entity['images'][nomImage]
@@ -314,11 +314,11 @@ def get_actual_image(entity, actualtime):
             else:
                 step += 1
 
+            entity['actualAnimation']['step'] = step
+            entity['actualAnimation']['time'] = actualTime
             nomImage = entity['animations'][name][step][0]
             return entity['images'][nomImage]
     else:
-        print('get_actual_image():entity')
-        pprint(entity)
         return None
 
 
@@ -392,8 +392,6 @@ def move_gamer(entity, temps):
     :param entity:
     '''
     global mx, my
-    start_animation(entity, 'marcheG', temps, True)
-    start_animation(entity, 'marcheD', temps, True)
 
     # verifie vitese (compare si la x > ou < xmouse et si y > ou < que ymouse) et modifier la vitesse
     vx = speed(entity, mx, 0)
@@ -419,6 +417,16 @@ def move_gamer(entity, temps):
     if ((entity['position'][1] + entity['size'][1] / 2) != my):
         entity['position'][1] += vy
 
+    if (vx == 0 and vy == 1):
+        start_animation(entity, 'anim_gamer_' + entity['actual_direction_img'] + '_static', temps, True)
+    else:
+        if (vx < 0 and is_animated(entity)[1] != "anim_gamer_left"):
+            start_animation(entity, 'anim_gamer_left', temps, True)
+            entity['actual_direction_img'] = 'left'
+        elif (vx > 0 and is_animated(entity)[1] != "anim_gamer_right"):
+            start_animation(entity, 'anim_gamer_right', temps, True)
+            entity['actual_direction_img'] = 'right'
+
 
 def move_ennemy(entity, actualTime):
     '''
@@ -429,8 +437,7 @@ def move_ennemy(entity, actualTime):
 
     :param entity:
     '''
-    start_animation(entity, 'marcheG', actualTime, True)
-    start_animation(entity, 'marcheD', actualTime, True)
+
     # Si pas actif on s'arrête ici
     if not is_active(entity):
         # Et si l'entité a expire la supprime
@@ -494,6 +501,18 @@ def move_ennemy(entity, actualTime):
             deplace_dist -= 1
         vitessex = randx
         vitessey = randy
+
+    # Animation
+    print(vitessex, vitessey)
+    if (vitessex == 0 and vitessey == 0):
+        start_animation(entity, 'anim_enemy_' + entity['actual_direction_img'] + '_static', actualTime, True)
+    else:
+        if (vitessex < 0 and is_animated(entity)[1] != "anim_enemy_left"):
+            start_animation(entity, 'anim_enemy_left', actualTime, True)
+            entity['actual_direction_img'] = 'left'
+        elif (vitessex > 0 and is_animated(entity)[1] != "anim_enemy_right"):
+            start_animation(entity, 'anim_enemy_right', actualTime, True)
+            entity['actual_direction_img'] = 'right'
 
     # Applique le déplacement
     entity['position'][0] += vitessex
@@ -567,9 +586,12 @@ def generate(generator, level, time):
         if generator['type'] == 'enemy':
             set_life(entity, level * 1 / 5, True)
 
-            print(get_life(entity))
             enemies.append(entity)
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:
+            start_animation(entity, 'anim_' + generator['type'], time, True)
+
+            pprint(entity)
+
             decors.append(entity)
             # Supprime ancien décor en surplut
             if len(decors) > 5:
@@ -919,6 +941,7 @@ fenetre = pygame.display.set_mode(WINDOWS_SIZE)
 pygame.display.set_caption("Batail des rêves")
 
 font_title = pygame.font.SysFont('Manjari', 36, True)
+# font_title = pygame.freetype.Font('Manjari-Regular.ttf', 36)
 font_small = pygame.font.SysFont('Manjari', 24, True)
 
 # Chargement des Images
@@ -976,7 +999,7 @@ images_gamer = {
     'gamer_right_right': gamer_right_right,
     'gamer_left_static': gamer_left_static,
     'gamer_left_left': gamer_left_left,
-    'gamer_left_right': gamer_right_right
+    'gamer_left_right': gamer_left_right
 }
 
 images_enemy = {
@@ -985,7 +1008,7 @@ images_enemy = {
     'enemy_right_right': enemy_right_right,
     'enemy_left_static': enemy_left_static,
     'enemy_left_left': enemy_left_left,
-    'enemy_left_right': enemy_right_right
+    'enemy_left_right': enemy_left_right
 }
 
 images_decor1 = {
@@ -1008,17 +1031,17 @@ anim_gamer_left_static = [
 ]
 
 anim_gamer_right = [
-    ('gamer_right_static', 300),
-    ('gamer_right_right', 300),
-    ('gamer_right_static', 300),
-    ('gamer_right_right', 300)
+    ('gamer_right_static', 100),
+    ('gamer_right_right', 100),
+    ('gamer_right_static', 100),
+    ('gamer_right_right', 100)
 ]
 
 anim_gamer_left = [
-    ('gamer_right_static', 300),
-    ('gamer_right_left', 300),
-    ('gamer_right_static', 300),
-    ('gamer_right_right', 300)
+    ('gamer_left_static', 100),
+    ('gamer_left_left', 100),
+    ('gamer_left_static', 100),
+    ('gamer_left_right', 100)
 ]
 
 anim_enemy_right_static = (
@@ -1033,14 +1056,14 @@ anim_enemy_right = (
     ('enemy_right_static', 300),
     ('enemy_right_right', 300),
     ('enemy_right_static', 300),
-    ('enemy_right_right', 300)
+    ('enemy_right_left', 300)
 )
 
 anim_enemy_left = (
-    ('enemy_right_static', 300),
-    ('enemy_right_left', 300),
-    ('enemy_right_static', 300),
-    ('enemy_right_right', 300)
+    ('enemy_left_static', 300),
+    ('enemy_left_left', 300),
+    ('enemy_left_static', 300),
+    ('enemy_left_right', 300)
 )
 animationsEnemy = {
     'anim_enemy_left': anim_enemy_left,
@@ -1049,9 +1072,9 @@ animationsEnemy = {
     'anim_enemy_right_static': anim_enemy_right_static,
 }
 
-animationsDecor1 = {'anim_decor1': (('decor1', None))}
-animationsDecor2 = {'anim_decor2': (('decor2', None))}
-animationsDecor3 = {'anim_decor3': (('decor3', None))}
+animationsDecor1 = {'anim_decor1': (('decor1', None), ('decor1', None))}
+animationsDecor2 = {'anim_decor2': (('decor2', None), ('decor2', None))}
+animationsDecor3 = {'anim_decor3': (('decor3', None), ('decor3', None))}
 
 # Generateurs
 enemiesGenerator = new_generator('enemy', 5 * 1000, 'edge', animationsEnemy, images_enemy)

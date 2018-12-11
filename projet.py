@@ -839,7 +839,7 @@ def draw_intro_menu(fenetre):
     explanation_text = "Utiliser la souris et la barre d'espace"
 
     title = font_title.render(title_text, True, BLACK)
-    # title = font_title.render(title_text, True, BLACK)
+
     title_width, title_height = font_title.size(title_text)
 
     explanation = font_small.render(explanation_text, True, BLACK)
@@ -940,9 +940,8 @@ pygame.init()
 fenetre = pygame.display.set_mode(WINDOWS_SIZE)
 pygame.display.set_caption("Batail des rêves")
 
-font_title = pygame.font.SysFont('Manjari', 36, True)
-# font_title = pygame.freetype.Font('Manjari-Regular.ttf', 36)
-font_small = pygame.font.SysFont('Manjari', 24, True)
+font_title = pygame.font.Font('Manjari.ttf', 36)
+font_small = pygame.font.Font('Manjari.ttf', 24)
 
 # Chargement des Images
 path = 'img/'

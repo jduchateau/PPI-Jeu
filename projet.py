@@ -1,11 +1,18 @@
-﻿import pygame
+﻿#!/usr/bin/env python
+
+import pygame
 import math
 import random
+import sys
 
 ##### VARIABLES & CONSTANTES #####
 
-ZOOM = 0.8
-WINDOWS_SIZE = (int(1000*ZOOM), int(800*ZOOM))
+ZOOM = 1
+if (len(sys.argv) > 1):
+    print(sys.argv[1])
+    ZOOM = float(sys.argv[1])
+
+WINDOWS_SIZE = (int(1000 * ZOOM), int(800 * ZOOM))
 GREY = (198, 186, 183)
 BLACK = (52, 51, 50)
 RED = (255, 70, 70)
@@ -18,17 +25,17 @@ SPEED_MAX = 10
 SPEED_MIN = 5
 DIST_MOVE_MAX = 200
 
-FIGURE_SIZE = (int(90*ZOOM), int(115*ZOOM))
-SHIELD_SIZE = (int(100*ZOOM), int(120*ZOOM))
-GUN_SIZE = (int(83*ZOOM), int(114*ZOOM))
-DECOR_SIZE = (int(300*ZOOM), int(300*ZOOM))
+FIGURE_SIZE = (int(90 * ZOOM), int(115 * ZOOM))
+SHIELD_SIZE = (int(100 * ZOOM), int(120 * ZOOM))
+GUN_SIZE = (int(83 * ZOOM), int(114 * ZOOM))
+DECOR_SIZE = (int(300 * ZOOM), int(300 * ZOOM))
 
 DIST_ATTACK_MAX = 150  # px
 ATTACK_DURATION = 500  # ms
 DIST_ENEMY_MIN = 90
 
-GAUGE_SIZE = int(100*ZOOM), int(30*ZOOM)
-GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - int(50*ZOOM), int(50*ZOOM)
+GAUGE_SIZE = int(100 * ZOOM), int(30 * ZOOM)
+GAUGE_POSITION = WINDOWS_SIZE[0] - GAUGE_SIZE[0] - int(50 * ZOOM), int(50 * ZOOM)
 
 
 ##### FONCTIONS #####
@@ -352,7 +359,6 @@ def draw(entity, ecran, time):
         ecran.blit(imgGunRotated, entity['gun']['position'])
 
 
-
 ##### Fin ANIMATION ######
 
 ### Début DÉPLACEMENT ####
@@ -580,7 +586,7 @@ def generate(generator, level, time):
         visible(entity)
 
         if generator['type'] == 'enemy':
-            set_life(entity, math.log(level+1), True)
+            set_life(entity, math.log(level + 1), True)
 
             enemies.append(entity)
         elif generator['type'] in ['decor1', 'decor2', 'decor3']:

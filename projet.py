@@ -1,6 +1,7 @@
-﻿from pprint import pprint
+from pprint import pprint
 
 import pygame
+import pygame.freetype
 import math
 import random
 
@@ -249,19 +250,23 @@ def create_animation(entity, animation, images=False):
         entity['images'].update(images)
 
 
-def start_animation(entity, animation_name, temps, retepe):
+def start_animation(entity, animation_name, temps, repete):
     '''
     Commencer une animation
     :param entity: le nom de l'entité
     :param animation_name: le nom de l'animation
     :param temps : temps actuen en milisecondes
-    :param retepe: le nombre de fois que l'animation va etre répétée
+    :param repete: le nombre de fois que l'animation va etre répétée
     '''
     actual_time = temps
     entity['actualAnimation']['name'] = animation_name
     entity['actualAnimation']['step'] = 0
     entity['actualAnimation']['time'] = actual_time
-    entity['actualAnimation']['repete'] = retepe
+    entity['actualAnimation']['repete'] = repete
+
+
+def is_animated(entity):
+    return entity['actualAnimation']['name'] != '', entity['actualAnimation']['name']
 
 
 def stop_animation(entity):
@@ -314,6 +319,8 @@ def get_actual_image(entity, actualtime):
             else:
                 step += 1
 
+            entity['actualAnimation']['step'] = step
+            entity['actualAnimation']['time'] = time
             nomImage = entity['animations'][name][step][0]
             return entity['images'][nomImage]
     else:
@@ -392,8 +399,9 @@ def move_gamer(entity, temps):
     :param entity:
     '''
     global mx, my
-    start_animation(entity, 'marcheG', temps, True)
-    start_animation(entity, 'marcheD', temps, True)
+
+    if (not is_animated(entity)[0]):
+        start_animation(entity, 'anim_gamer_left', temps, True)
 
     # verifie vitese (compare si la x > ou < xmouse et si y > ou < que ymouse) et modifier la vitesse
     vx = speed(entity, mx, 0)
@@ -429,8 +437,8 @@ def move_ennemy(entity, actualTime):
 
     :param entity:
     '''
-    start_animation(entity, 'marcheG', actualTime, True)
-    start_animation(entity, 'marcheD', actualTime, True)
+    start_animation(entity, 'anim_enemy_right', actualTime, True)
+
     # Si pas actif on s'arrête ici
     if not is_active(entity):
         # Et si l'entité a expire la supprime
@@ -919,6 +927,7 @@ fenetre = pygame.display.set_mode(WINDOWS_SIZE)
 pygame.display.set_caption("Batail des rêves")
 
 font_title = pygame.font.SysFont('Manjari', 36, True)
+# font_title = pygame.freetype.Font('Manjari-Regular.ttf', 36)
 font_small = pygame.font.SysFont('Manjari', 24, True)
 
 # Chargement des Images

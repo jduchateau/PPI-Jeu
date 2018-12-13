@@ -1,5 +1,10 @@
 ﻿#!/usr/bin/env python
 
+'''
+:title : The Dream Battle or Bataille des rêves
+:autors: Jakub Duchateau, Raul-Mihai Talmacel
+'''
+
 import pygame
 import math
 import random

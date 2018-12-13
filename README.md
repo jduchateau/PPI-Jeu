@@ -29,4 +29,4 @@ En dessous, votre *level* et le *nombre de mort*
 Vous trouverez comment fonctionne les décors tout seul.
 
 ## Auteurs :
-Jakub Duchateau && Raul Talmacel
+Jakub Duchateau && Raul-Mihai Talmacel

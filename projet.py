@@ -1084,7 +1084,7 @@ animationsEnemy = {
 }
 
 animationsDecor1 = {'anim_decor1': (('decor1', None), ('decor1', None))}
-animationsDecor2 = {'anim_decor2': (('decor2', 80), ('decor2b', 80), ('decor2c', 80), ('decor2d', 80))}
+animationsDecor2 = {'anim_deco  r2': (('decor2', 80), ('decor2b', 80), ('decor2c', 80), ('decor2d', 80))}
 animationsDecor3 = {'anim_decor3': (('decor3', 200), ('decor3b', 200))}
 
 # Generateurs
